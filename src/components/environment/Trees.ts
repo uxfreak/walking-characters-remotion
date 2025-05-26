@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { TreeMaterials } from '../../constants/materials';
-import { randomRange } from '../../utils/math';
+import { randomRange, SeededRandom } from '../../utils/math';
 import { createLoopableObject, LoopableObject } from '../../utils/three-helpers';
 
 export enum TreeType {
@@ -16,15 +16,21 @@ export interface TreeConfig {
   position?: THREE.Vector3;
   resetZ?: number;
   maxZ?: number;
+  seed?: number;
 }
 
 export class Tree extends THREE.Group {
+  private rng: SeededRandom;
+
   constructor(config: TreeConfig = {}) {
     super();
     
-    const type = config.type ?? Math.floor(Math.random() * 3);
-    const trunkMaterial = TreeMaterials.trunks[Math.floor(Math.random() * TreeMaterials.trunks.length)];
-    const foliageMaterial = TreeMaterials.foliage[Math.floor(Math.random() * TreeMaterials.foliage.length)];
+    // Use seed for deterministic generation
+    this.rng = new SeededRandom(config.seed ?? 12345);
+    
+    const type = config.type ?? Math.floor(this.rng.next() * 3);
+    const trunkMaterial = TreeMaterials.trunks[Math.floor(this.rng.next() * TreeMaterials.trunks.length)];
+    const foliageMaterial = TreeMaterials.foliage[Math.floor(this.rng.next() * TreeMaterials.foliage.length)];
     
     switch (type) {
       case TreeType.TALL_JUNGLE:
@@ -38,8 +44,8 @@ export class Tree extends THREE.Group {
         break;
     }
     
-    // Random rotation
-    this.rotation.y = Math.random() * Math.PI * 2;
+    // Deterministic rotation
+    this.rotation.y = this.rng.next() * Math.PI * 2;
     
     // Set position if provided
     if (config.position) {
@@ -60,8 +66,8 @@ export class Tree extends THREE.Group {
   ): void {
     const minHeight = config.minHeight ?? 8;
     const maxHeight = config.maxHeight ?? 20;
-    const trunkHeight = randomRange(minHeight, maxHeight);
-    const trunkRadius = randomRange(0.4, 1);
+    const trunkHeight = this.rng.range(minHeight, maxHeight);
+    const trunkRadius = this.rng.range(0.4, 1);
     
     // Trunk
     const trunk = this.createMesh(
@@ -72,7 +78,7 @@ export class Tree extends THREE.Group {
     this.add(trunk);
     
     // Canopy
-    const foliageRadius = randomRange(3, 5);
+    const foliageRadius = this.rng.range(3, 5);
     const canopy = this.createMesh(
       new THREE.SphereGeometry(foliageRadius, 10, 8),
       foliageMaterial
@@ -89,8 +95,8 @@ export class Tree extends THREE.Group {
   ): void {
     const minHeight = config.minHeight ?? 7;
     const maxHeight = config.maxHeight ?? 15;
-    const trunkHeight = randomRange(minHeight, maxHeight);
-    const trunkRadius = randomRange(0.5, 0.9);
+    const trunkHeight = this.rng.range(minHeight, maxHeight);
+    const trunkRadius = this.rng.range(0.5, 0.9);
     
     // Trunk
     const trunk = this.createMesh(
@@ -101,7 +107,7 @@ export class Tree extends THREE.Group {
     this.add(trunk);
     
     // Wide canopy
-    const canopyRadius = randomRange(4, 6);
+    const canopyRadius = this.rng.range(4, 6);
     const canopy = this.createMesh(
       new THREE.SphereGeometry(canopyRadius, 10, 6),
       foliageMaterial
@@ -112,7 +118,7 @@ export class Tree extends THREE.Group {
     
     // Additional smaller canopies
     for (let j = 0; j < 2; j++) {
-      const smallCanopyRadius = randomRange(1.5, 2.3);
+      const smallCanopyRadius = this.rng.range(1.5, 2.3);
       const smallCanopy = this.createMesh(
         new THREE.SphereGeometry(smallCanopyRadius, 8, 6),
         foliageMaterial
@@ -135,8 +141,8 @@ export class Tree extends THREE.Group {
   ): void {
     const minHeight = config.minHeight ?? 8;
     const maxHeight = config.maxHeight ?? 18;
-    const trunkHeight = randomRange(minHeight, maxHeight);
-    const trunkRadius = randomRange(0.3, 0.6);
+    const trunkHeight = this.rng.range(minHeight, maxHeight);
+    const trunkRadius = this.rng.range(0.3, 0.6);
     
     // Trunk
     const trunk = this.createMesh(
@@ -147,7 +153,7 @@ export class Tree extends THREE.Group {
     this.add(trunk);
     
     // Irregular foliage
-    const foliageRadius = randomRange(2.5, 4);
+    const foliageRadius = this.rng.range(2.5, 4);
     const mainFoliage = this.createMesh(
       new THREE.SphereGeometry(foliageRadius, 8, 6),
       foliageMaterial
@@ -159,16 +165,16 @@ export class Tree extends THREE.Group {
     // Hanging vines
     const vineMaterial = new THREE.MeshPhongMaterial({ color: 0x556B2F });
     for (let j = 0; j < 3; j++) {
-      const vineLength = randomRange(1, 3);
+      const vineLength = this.rng.range(1, 3);
       const vine = this.createMesh(
         new THREE.CylinderGeometry(0.02, 0.05, vineLength, 6),
         vineMaterial
       );
       const vineStartHeight = mainFoliage.position.y - foliageRadius * 0.5;
       vine.position.set(
-        (Math.random() - 0.5) * foliageRadius * 1.5,
+        (this.rng.next() - 0.5) * foliageRadius * 1.5,
         vineStartHeight - vineLength / 2,
-        (Math.random() - 0.5) * foliageRadius * 1.5
+        (this.rng.next() - 0.5) * foliageRadius * 1.5
       );
       this.add(vine);
     }
@@ -177,24 +183,28 @@ export class Tree extends THREE.Group {
 
 export class TreeField {
   private trees: LoopableObject[] = [];
+  private rng: SeededRandom;
   
   constructor(
     scene: THREE.Scene,
     count: number = 60,
     resetZ: number = -80,
-    maxZ: number = 80
+    maxZ: number = 80,
+    seed: number = 12345
   ) {
+    this.rng = new SeededRandom(seed);
+    
     for (let i = 0; i < count; i++) {
-      const treeType = Math.floor(Math.random() * 3) as TreeType;
-      const tree = new Tree({ type: treeType });
+      const treeType = Math.floor(this.rng.next() * 3) as TreeType;
+      const tree = new Tree({ type: treeType, seed: seed + i });
       
       // Position trees in jungle
-      const side = Math.random() > 0.5 ? -1 : 1;
-      const distanceFromPath = randomRange(3, 23);
-      const spreadZ = (i - count / 2) * 6 + randomRange(-7.5, 7.5);
+      const side = this.rng.next() > 0.5 ? -1 : 1;
+      const distanceFromPath = this.rng.range(3, 23);
+      const spreadZ = (i - count / 2) * 6 + this.rng.range(-7.5, 7.5);
       
       tree.position.set(
-        side * distanceFromPath + randomRange(-2.5, 2.5),
+        side * distanceFromPath + this.rng.range(-2.5, 2.5),
         -1.3,
         spreadZ
       );
@@ -215,20 +225,17 @@ export class TreeField {
   }
   
   public updateByFrame(totalDistance: number): void {
-    const loopDistance = 160; // Distance before trees loop (resetZ - maxZ)
+    const loopDistance = 160; // Distance before trees loop (maxZ - resetZ)
     
     this.trees.forEach((tree, index) => {
-      // Store initial position if not already stored
-      if (tree.userData.initialZ === undefined) {
-        tree.userData.initialZ = tree.position.z;
-      }
+      // Use the stored original position from creation
+      const initialZ = tree.userData.originalZ || tree.position.z;
       
       // Calculate position based on total distance with looping
-      const initialZ = tree.userData.initialZ as number;
       const movedDistance = totalDistance % loopDistance;
       tree.position.z = initialZ - movedDistance;
       
-      // Handle wrapping
+      // Handle wrapping smoothly
       if (tree.position.z < -80) {
         tree.position.z += loopDistance;
       }

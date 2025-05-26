@@ -19,7 +19,7 @@ export class JunglePath {
       pathSegment.rotation.x = -Math.PI / 2;
       pathSegment.position.set(
         0, 
-        -1.29, 
+        -1.25, 
         (i - this.numSegments / 2) * this.segmentLength * 0.8
       );
       pathSegment.receiveShadow = true;
@@ -43,16 +43,13 @@ export class JunglePath {
     const loopDistance = this.segmentLength * this.numSegments * 0.8; // Total loop distance
     
     this.pathSegments.forEach((segment, index) => {
-      // Store initial position if not already stored
-      if (segment.userData.initialZ === undefined) {
-        segment.userData.initialZ = (index - this.numSegments / 2) * this.segmentLength * 0.8;
-      }
+      // Use the stored original position from creation
+      const initialZ = segment.userData.originalZ || segment.position.z;
       
       // Calculate position based on total distance with looping
-      const offsetZ = segment.userData.initialZ as number;
-      segment.position.z = offsetZ - (totalDistance % loopDistance);
+      segment.position.z = initialZ - (totalDistance % loopDistance);
       
-      // Handle wrapping
+      // Handle wrapping smoothly
       if (segment.position.z < -loopDistance / 2) {
         segment.position.z += loopDistance;
       }

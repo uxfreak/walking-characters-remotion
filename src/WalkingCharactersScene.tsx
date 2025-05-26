@@ -106,9 +106,10 @@ export default function WalkingCharactersScene({
     const initializeScene = () => {
       if (!mountRef.current) return;
     
+    let sceneSetup;
     try {
       // Create scene setup
-      const sceneSetup = new SceneSetup({
+      sceneSetup = new SceneSetup({
         backgroundColor: 0x8FBC8F,
         fogColor: 0x7A9B7A,
         fogNear: 25,
@@ -140,8 +141,8 @@ export default function WalkingCharactersScene({
       controlsRef.current = controls;
     }
     
-    // Create jungle environment
-    const jungle = new JungleEnvironment(sceneSetup.scene);
+    // Create jungle environment with deterministic seed
+    const jungle = new JungleEnvironment(sceneSetup.scene, 12345);
     jungleRef.current = jungle;
     
     // Create characters

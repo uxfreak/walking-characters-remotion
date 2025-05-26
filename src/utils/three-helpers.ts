@@ -20,6 +20,7 @@ export const createLoopableObject = (
   loopable.userData.isBackgroundObject = true;
   loopable.userData.resetZ = resetZ;
   loopable.userData.maxZ = maxZ;
+  loopable.userData.originalZ = object.position.z; // Store initial position
   if (speed !== undefined) {
     loopable.userData.speed = speed;
   }

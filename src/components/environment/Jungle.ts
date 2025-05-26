@@ -16,18 +16,18 @@ export interface JungleEnvironmentElements {
 export class JungleEnvironment {
   private elements: JungleEnvironmentElements;
   
-  constructor(scene: THREE.Scene) {
+  constructor(scene: THREE.Scene, seed: number = 12345) {
     // Create ground
     const ground = this.createGround();
     scene.add(ground);
     
-    // Create environment elements
+    // Create environment elements with deterministic seeds
     this.elements = {
       ground,
       path: new JunglePath(scene),
-      trees: new TreeField(scene),
-      mountains: new MountainRange(scene),
-      undergrowth: new UndergrowthField(scene)
+      trees: new TreeField(scene, 60, -80, 80, seed),
+      mountains: new MountainRange(scene, -120, 120, seed + 10000),
+      undergrowth: new UndergrowthField(scene, 40, -80, 80, seed + 20000)
     };
   }
   
