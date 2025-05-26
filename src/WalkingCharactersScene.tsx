@@ -106,16 +106,25 @@ export default function WalkingCharactersScene({
     const initializeScene = () => {
       if (!mountRef.current) return;
     
-    // Create scene setup
-    const sceneSetup = new SceneSetup({
-      backgroundColor: 0x8FBC8F,
-      fogColor: 0x7A9B7A,
-      fogNear: 25,
-      fogFar: 80,
-      enableShadows: true
-    });
-    sceneSetupRef.current = sceneSetup;
-    sceneSetup.mount(mountRef.current);
+    try {
+      // Create scene setup
+      const sceneSetup = new SceneSetup({
+        backgroundColor: 0x8FBC8F,
+        fogColor: 0x7A9B7A,
+        fogNear: 25,
+        fogFar: 80,
+        enableShadows: true
+      });
+      sceneSetupRef.current = sceneSetup;
+      sceneSetup.mount(mountRef.current);
+    } catch (error) {
+      console.error('Failed to initialize WebGL scene:', error);
+      // For Remotion rendering, we need WebGL
+      if (typeof window !== 'undefined' && !window.WebGLRenderingContext) {
+        console.error('WebGL is not supported in this environment');
+      }
+      return;
+    }
     
     // Create controls only if enabled
     if (enableControls) {

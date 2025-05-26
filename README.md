@@ -26,10 +26,33 @@ npm start
 
 ## Building
 
-Render a video:
+Render a video (requires WebGL support):
 
 ```bash
+# Using ANGLE (recommended)
 npm run build
+
+# Using SwiftShader (alternative)
+npm run build:swiftshader
+
+# Render cinematic version
+npm run build:cinematic
+
+# Or use the render script
+./render.sh angle JungleWalk out/video.mp4
+```
+
+### Troubleshooting WebGL Errors
+
+If you encounter "Error creating WebGL context", use one of these solutions:
+
+1. **Use ANGLE** (recommended): Add `--gl=angle` to your render command
+2. **Use SwiftShader**: Add `--gl=swiftshader` to your render command
+3. **Use the provided npm scripts** which include the correct flags
+
+Example:
+```bash
+npx remotion render JungleWalk out/video.mp4 --gl=angle
 ```
 
 ## Project Structure

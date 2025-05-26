@@ -5,8 +5,11 @@
   "main": "index.js",
   "scripts": {
     "start": "remotion studio",
-    "build": "remotion render JungleWalk out/video.mp4",
-    "preview": "remotion preview"
+    "build": "remotion render JungleWalk out/video.mp4 --gl=angle",
+    "build:swiftshader": "remotion render JungleWalk out/video.mp4 --gl=swiftshader",
+    "build:cinematic": "remotion render CinematicJungleWalk out/cinematic.mp4 --gl=angle",
+    "preview": "remotion preview",
+    "render:help": "echo 'Use --gl=angle or --gl=swiftshader for WebGL support in headless rendering'"
   },
   "keywords": [],
   "author": "",
