@@ -1,0 +1,14 @@
+{
+  "conversation": [
+    { "start": 0, "end": 90, "speaker": "NONE", "text": "" },
+    { "start": 90, "end": 180, "speaker": "CHARACTER_1", "text": "This jungle path is incredible!" },
+    { "start": 180, "end": 270, "speaker": "CHARACTER_2", "text": "I've never seen trees this tall before." },
+    { "start": 270, "end": 360, "speaker": "CHARACTER_1", "text": "Look at all the wildlife around us!" },
+    { "start": 360, "end": 450, "speaker": "BOTH", "text": "Did you see that?!" },
+    { "start": 450, "end": 540, "speaker": "CHARACTER_2", "text": "It's so peaceful here." },
+    { "start": 540, "end": 630, "speaker": "CHARACTER_1", "text": "We should explore more often." },
+    { "start": 630, "end": 720, "speaker": "CHARACTER_2", "text": "Absolutely! This is amazing." },
+    { "start": 720, "end": 810, "speaker": "BOTH", "text": "Adventure awaits!" },
+    { "start": 810, "end": 900, "speaker": "NONE", "text": "" }
+  ]
+}

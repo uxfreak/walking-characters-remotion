@@ -1,0 +1,20 @@
+{
+  "render": {
+    "outputDirectory": "out",
+    "videoFormat": "mp4",
+    "qualityPreset": "high",
+    "filenameTemplate": "JungleWalk_{timestamp}",
+    "cinematicFilenameTemplate": "CinematicJungleWalk_{timestamp}",
+    "timezone": "Asia/Kolkata",
+    "timestampFormat": "YYYY-MM-DD_HH-mm-ss"
+  },
+  "video": {
+    "duration": 30,
+    "fps": 30,
+    "totalFrames": 900,
+    "resolution": {
+      "width": 1920,
+      "height": 1080
+    }
+  }
+}

@@ -1,52 +1,30 @@
 import React from 'react';
 import { useCurrentFrame, useVideoConfig, interpolate } from 'remotion';
 import WalkingCharactersScene from '../WalkingCharactersScene';
-import { Speaker } from '../components/characters/CharacterAnimations';
-import { CameraShots, getShotFromSequence, ShotSequences } from '../constants/cameraShots';
+import { CameraShots } from '../constants/cameraShots';
+import { JungleWalkProps, getSpeakerAtFrame, getCurrentText, getCameraShot } from '../utils/metadataCalculator';
+import { defaultSceneConfig } from '../data/sceneConfig';
 
-// Define conversation segments with timing
-const conversationSegments = [
-  { start: 0, end: 90, speaker: Speaker.CHARACTER_1, text: "Look at these amazing trees!" },
-  { start: 90, end: 180, speaker: Speaker.CHARACTER_2, text: "The jungle is so peaceful today." },
-  { start: 180, end: 270, speaker: Speaker.BOTH, text: "Did you hear that sound?!" },
-  { start: 270, end: 360, speaker: Speaker.CHARACTER_1, text: "It's just the birds, don't worry." },
-  { start: 360, end: 450, speaker: Speaker.CHARACTER_2, text: "This path goes on forever!" },
-  { start: 450, end: 540, speaker: Speaker.CHARACTER_1, text: "That's the beauty of nature." },
-  { start: 540, end: 630, speaker: Speaker.BOTH, text: "Let's explore more!" },
-  { start: 630, end: 720, speaker: Speaker.CHARACTER_2, text: "I love these adventures with you." },
-  { start: 720, end: 810, speaker: Speaker.CHARACTER_1, text: "Me too, my friend." },
-  { start: 810, end: 900, speaker: Speaker.NONE, text: "" } // Silent walking
-];
-
-const getSpeakerAtFrame = (frame: number): Speaker => {
-  const segment = conversationSegments.find(
-    seg => frame >= seg.start && frame < seg.end
-  );
-  return segment ? segment.speaker : Speaker.NONE;
-};
-
-const getCurrentText = (frame: number): string => {
-  const segment = conversationSegments.find(
-    seg => frame >= seg.start && frame < seg.end
-  );
-  return segment ? segment.text : "";
-};
-
-export const JungleWalk: React.FC = () => {
+export const JungleWalk: React.FC<JungleWalkProps> = (props) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   
-  const currentSpeaker = getSpeakerAtFrame(frame);
-  const currentText = getCurrentText(frame);
+  // Use processed scene config from calculateMetadata or fallback to default
+  const sceneConfig = props.sceneConfig || defaultSceneConfig;
   
-  // Get camera shot based on frame
-  const currentShot = getShotFromSequence(ShotSequences.conversation, frame);
+  const currentSpeaker = getSpeakerAtFrame(frame, sceneConfig.conversation);
+  const currentText = getCurrentText(frame, sceneConfig.conversation);
+  const shotName = getCameraShot(frame, sceneConfig.cameraSequence);
   
-  // Fade in/out for subtitles
-  const textSegment = conversationSegments.find(
+  // Get camera shot from shots configuration
+  const currentShot = CameraShots[shotName] || CameraShots.wide;
+  
+  // Find current conversation segment for subtitle timing
+  const textSegment = sceneConfig.conversation.find(
     seg => frame >= seg.start && frame < seg.end
   );
   
+  // Calculate subtitle opacity with fade in/out
   let subtitleOpacity = 0;
   if (textSegment && currentText) {
     const segmentProgress = (frame - textSegment.start) / (textSegment.end - textSegment.start);
@@ -91,12 +69,22 @@ export const JungleWalk: React.FC = () => {
           maxWidth: '80%',
           textAlign: 'center',
           opacity: subtitleOpacity,
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)'
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
+          zIndex: 1000
         }}>
           {currentText}
         </div>
       )}
       
+      {/* Background Audio */}
+      {props.backgroundAudio && (
+        <audio 
+          src={props.backgroundAudio}
+          style={{ display: 'none' }}
+          autoPlay
+          loop
+        />
+      )}
     </div>
   );
 };

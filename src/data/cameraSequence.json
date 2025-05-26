@@ -1,0 +1,17 @@
+{
+  "cameraSequence": [
+    { "shotName": "environment", "start": 0, "end": 60 },
+    { "shotName": "wide", "start": 60, "end": 150 },
+    { "shotName": "character1Focus", "start": 150, "end": 240 },
+    { "shotName": "character2Focus", "start": 240, "end": 330 },
+    { "shotName": "closeUp", "start": 330, "end": 420 },
+    { "shotName": "sideProfile", "start": 420, "end": 480 },
+    { "shotName": "overShoulder1", "start": 480, "end": 540 },
+    { "shotName": "overShoulder2", "start": 540, "end": 600 },
+    { "shotName": "tracking", "start": 600, "end": 690 },
+    { "shotName": "lowAngle", "start": 690, "end": 750 },
+    { "shotName": "highAngle", "start": 750, "end": 810 },
+    { "shotName": "frontView", "start": 810, "end": 870 },
+    { "shotName": "wide", "start": 870, "end": 900 }
+  ]
+}
