@@ -14,8 +14,11 @@ export interface ConversationSegment {
   audioSrc?: string; // Optional audio file for this segment
 }
 
+export type CharacterGender = 'male' | 'female';
+
 export interface CharacterStyle {
   name: string;
+  gender: CharacterGender;
   primaryColor: string; // Hex color for shirt
   secondaryColor: string; // Hex color for pants
   hairColor: string;
@@ -68,6 +71,7 @@ export const deepConversationConfig: SceneConfig = {
   characters: {
     character1: {
       name: 'Alex',
+      gender: 'male',
       primaryColor: '#2563eb', // Blue shirt
       secondaryColor: '#1e3a8a', // Dark blue pants
       hairColor: '#8b4513', // Brown hair
@@ -75,10 +79,49 @@ export const deepConversationConfig: SceneConfig = {
     },
     character2: {
       name: 'Maya',
+      gender: 'female',
       primaryColor: '#dc2626', // Red shirt
       secondaryColor: '#991b1b', // Dark red pants
       hairColor: '#2d1b69', // Dark purple hair
       skinTone: '#cd853f' // Slightly darker skin tone
+    }
+  }
+};
+
+// Simple conversation with mixed gender pair
+export const simpleConversationConfig: SceneConfig = {
+  cameraSequence: [
+    { shotName: 'wide', start: 0, end: 150 },
+    { shotName: 'character1Focus', start: 150, end: 300 },
+    { shotName: 'character2Focus', start: 300, end: 450 },
+    { shotName: 'overShoulder1', start: 450, end: 600 },
+    { shotName: 'overShoulder2', start: 600, end: 750 },
+    { shotName: 'sideProfile', start: 750, end: 900 }
+  ],
+  conversation: [
+    { start: 0, end: 150, speaker: Speaker.CHARACTER_1, text: 'It\'s such a beautiful day for a walk, Sarah!' },
+    { start: 150, end: 300, speaker: Speaker.CHARACTER_2, text: 'I know, right? The weather is perfect.' },
+    { start: 300, end: 450, speaker: Speaker.CHARACTER_1, text: 'I love how the sunlight filters through the trees.' },
+    { start: 450, end: 600, speaker: Speaker.CHARACTER_2, text: 'It reminds me of our hikes back in college.' },
+    { start: 600, end: 750, speaker: Speaker.CHARACTER_1, text: 'Those were good times. We should do this more often.' },
+    { start: 750, end: 900, speaker: Speaker.CHARACTER_2, text: 'Definitely! Maybe we can make it a weekly thing.' }
+  ],
+  characters: {
+    character1: {
+      name: 'Tom',
+      gender: 'male',
+      primaryColor: '#059669', // Green shirt
+      secondaryColor: '#064e3b', // Dark green pants
+      hairColor: '#1f2937', // Dark hair
+      skinTone: '#fdbcb4' // Light skin tone
+    },
+    character2: {
+      name: 'Sarah',
+      gender: 'female',
+      primaryColor: '#7c3aed', // Purple shirt
+      secondaryColor: '#4c1d95', // Dark purple pants
+      hairColor: '#fbbf24', // Blonde hair
+      skinTone: '#e0ac69' // Medium skin tone
     }
   }
 };

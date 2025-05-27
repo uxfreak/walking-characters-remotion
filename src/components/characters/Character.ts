@@ -26,6 +26,7 @@ export class Character extends THREE.Group {
     // Default style if none provided
     this.style = style || {
       name: 'Default',
+      gender: 'male',
       primaryColor: '#4f46e5', // Default indigo
       secondaryColor: '#3730a3', // Dark indigo
       hairColor: '#8b4513', // Brown
@@ -55,25 +56,38 @@ export class Character extends THREE.Group {
     // Create custom materials based on style
     const customMaterials = this.createCustomMaterials();
     
-    // Torso - shirt
+    // Gender-based proportions
+    const isFemale = this.style.gender === 'female';
+    
+    // Torso - shirt (females have slightly different proportions)
     const torsoShirt = this.createMesh(
-      new THREE.CylinderGeometry(0.4, 0.5, 1.2, 16),
+      new THREE.CylinderGeometry(
+        isFemale ? 0.35 : 0.4,  // top radius
+        isFemale ? 0.45 : 0.5,  // bottom radius
+        isFemale ? 1.1 : 1.2,   // height
+        16
+      ),
       customMaterials.shirt
     );
     torsoShirt.position.y = 0.75;
     this.add(torsoShirt);
     
-    // Torso - pants
+    // Torso - pants (females have wider hips)
     const torsoPants = this.createMesh(
-      new THREE.CylinderGeometry(0.45, 0.5, 0.9, 16),
+      new THREE.CylinderGeometry(
+        isFemale ? 0.4 : 0.45,   // top radius
+        isFemale ? 0.55 : 0.5,   // bottom radius
+        0.9,
+        16
+      ),
       customMaterials.pants
     );
     torsoPants.position.y = 0.15;
     this.add(torsoPants);
     
-    // Shoulders/neck
+    // Shoulders/neck (females have narrower shoulders)
     const shoulders = this.createMesh(
-      new THREE.SphereGeometry(0.35, 16, 8),
+      new THREE.SphereGeometry(isFemale ? 0.3 : 0.35, 16, 8),
       customMaterials.skin
     );
     shoulders.position.y = 1.4;
@@ -129,21 +143,52 @@ export class Character extends THREE.Group {
     const headGroup = new THREE.Group();
     headGroup.position.y = 2.2;
     
-    // Head
+    const isFemale = this.style.gender === 'female';
+    
+    // Head (females have slightly smaller heads)
     const head = this.createMesh(
-      new THREE.SphereGeometry(0.48, 20, 20),
+      new THREE.SphereGeometry(isFemale ? 0.45 : 0.48, 20, 20),
       materials.skin
     );
     headGroup.add(head);
     
-    // Hair
-    const hair = this.createMesh(
-      new THREE.CylinderGeometry(0.48, 0.4, 0.33, 16),
-      materials.hair
-    );
-    hair.position.set(0, 0.4, -0.08);
-    hair.rotation.x = degreesToRadians(-3);
-    headGroup.add(hair);
+    // Hair - different styles for male/female
+    if (isFemale) {
+      // Longer hair for females
+      const hair = this.createMesh(
+        new THREE.CylinderGeometry(0.48, 0.35, 0.5, 16),
+        materials.hair
+      );
+      hair.position.set(0, 0.35, -0.1);
+      hair.rotation.x = degreesToRadians(-5);
+      headGroup.add(hair);
+      
+      // Additional hair volume on sides
+      const leftHair = this.createMesh(
+        new THREE.SphereGeometry(0.25, 12, 8),
+        materials.hair
+      );
+      leftHair.position.set(-0.35, 0.1, -0.05);
+      leftHair.scale.set(0.7, 1.2, 0.8);
+      headGroup.add(leftHair);
+      
+      const rightHair = this.createMesh(
+        new THREE.SphereGeometry(0.25, 12, 8),
+        materials.hair
+      );
+      rightHair.position.set(0.35, 0.1, -0.05);
+      rightHair.scale.set(0.7, 1.2, 0.8);
+      headGroup.add(rightHair);
+    } else {
+      // Shorter hair for males
+      const hair = this.createMesh(
+        new THREE.CylinderGeometry(0.48, 0.4, 0.33, 16),
+        materials.hair
+      );
+      hair.position.set(0, 0.4, -0.08);
+      hair.rotation.x = degreesToRadians(-3);
+      headGroup.add(hair);
+    }
     
     // Face features
     this.addFaceFeatures(headGroup, materials);
@@ -152,23 +197,42 @@ export class Character extends THREE.Group {
   }
   
   private addFaceFeatures(headGroup: THREE.Group, materials: any): void {
-    // Mouth
+    const isFemale = this.style.gender === 'female';
+    
+    // Mouth (females have slightly smaller mouth)
     const mouth = this.createMesh(
-      new THREE.SphereGeometry(0.08, 12, 8),
+      new THREE.SphereGeometry(isFemale ? 0.07 : 0.08, 12, 8),
       materials.mouth
     );
     mouth.name = 'mouth';
-    mouth.position.set(0, -0.22, 0.45);
+    mouth.position.set(0, -0.22, isFemale ? 0.43 : 0.45);
     mouth.scale.set(0.7, 0.2, 0.5);
     headGroup.add(mouth);
     
-    // Nose
+    // Nose (females have slightly smaller, more refined nose)
     const nose = this.createMesh(
-      new THREE.SphereGeometry(0.04, 8, 8),
+      new THREE.SphereGeometry(isFemale ? 0.035 : 0.04, 8, 8),
       materials.nose
     );
-    nose.position.set(0, -0.08, 0.47);
+    nose.position.set(0, -0.08, isFemale ? 0.45 : 0.47);
     headGroup.add(nose);
+    
+    // Add eyelashes for females
+    if (isFemale) {
+      const eyelashPositions = [
+        { x: -0.14, side: 'left' },
+        { x: 0.14, side: 'right' }
+      ];
+      
+      eyelashPositions.forEach(pos => {
+        const eyelash = this.createMesh(
+          new THREE.BoxGeometry(0.08, 0.005, 0.01),
+          new THREE.MeshPhongMaterial({ color: '#000000' })
+        );
+        eyelash.position.set(pos.x, 0.12, 0.44);
+        headGroup.add(eyelash);
+      });
+    }
     
     // Eyes
     const eyeGroup = this.createEyes(materials);
@@ -221,6 +285,7 @@ export class Character extends THREE.Group {
   }
   
   private createEyebrows(headGroup: THREE.Group, materials: any): void {
+    const isFemale = this.style.gender === 'female';
     const eyebrowPositions = [
       { x: -0.14, rotation: 0.1 },
       { x: 0.14, rotation: -0.1 }
@@ -228,7 +293,11 @@ export class Character extends THREE.Group {
     
     eyebrowPositions.forEach(pos => {
       const eyebrow = this.createMesh(
-        new THREE.BoxGeometry(0.1, 0.025, 0.025),
+        new THREE.BoxGeometry(
+          isFemale ? 0.08 : 0.1,     // width - thinner for females
+          isFemale ? 0.015 : 0.025,   // height - thinner for females
+          0.025
+        ),
         materials.eyebrow
       );
       eyebrow.position.set(pos.x, 0.18, 0.45);
@@ -238,13 +307,15 @@ export class Character extends THREE.Group {
   }
   
   private createArm(side: 'left' | 'right', materials: any): { armGroup: THREE.Group; forearmGroup: THREE.Group } {
+    const isFemale = this.style.gender === 'female';
     const armGroup = new THREE.Group();
-    const xPos = side === 'left' ? -0.4 : 0.4;
+    const xPos = (side === 'left' ? -0.4 : 0.4) * (isFemale ? 0.9 : 1); // Narrower arm position for females
     armGroup.position.set(xPos, 1.2, 0);
     
-    // Upper arm
+    // Upper arm (thinner for females)
+    const armRadius = isFemale ? 0.1 : 0.12;
     const upperArm = this.createMesh(
-      new THREE.CylinderGeometry(0.12, 0.12, 0.6, 8),
+      new THREE.CylinderGeometry(armRadius, armRadius, 0.6, 8),
       materials.skin
     );
     upperArm.position.y = -0.3;
@@ -254,17 +325,19 @@ export class Character extends THREE.Group {
     const forearmGroup = new THREE.Group();
     forearmGroup.position.y = -0.6;
     
-    // Forearm
+    // Forearm (thinner for females)
+    const forearmTopRadius = isFemale ? 0.08 : 0.1;
+    const forearmBottomRadius = isFemale ? 0.1 : 0.12;
     const forearm = this.createMesh(
-      new THREE.CylinderGeometry(0.1, 0.12, 0.5, 8),
+      new THREE.CylinderGeometry(forearmTopRadius, forearmBottomRadius, 0.5, 8),
       materials.skin
     );
     forearm.position.y = -0.25;
     forearmGroup.add(forearm);
     
-    // Hand
+    // Hand (smaller for females)
     const hand = this.createMesh(
-      new THREE.SphereGeometry(0.15, 8, 8),
+      new THREE.SphereGeometry(isFemale ? 0.12 : 0.15, 8, 8),
       materials.skin
     );
     hand.position.set(0, -0.5, 0);
@@ -277,12 +350,19 @@ export class Character extends THREE.Group {
   }
   
   private createLeg(side: 'left' | 'right', materials: any): THREE.Group {
+    const isFemale = this.style.gender === 'female';
     const legGroup = new THREE.Group();
     const xPos = side === 'left' ? -0.2 : 0.2;
     legGroup.position.set(xPos, 0, 0);
     
+    // Legs - females have different proportions
     const leg = this.createMesh(
-      new THREE.CylinderGeometry(0.15, 0.18, 1.2, 12),
+      new THREE.CylinderGeometry(
+        isFemale ? 0.14 : 0.15,  // top radius
+        isFemale ? 0.16 : 0.18,  // bottom radius
+        1.2,
+        12
+      ),
       materials.pants
     );
     leg.position.y = -0.6;
@@ -292,8 +372,14 @@ export class Character extends THREE.Group {
   }
   
   private createShoe(side: 'left' | 'right', materials: any): THREE.Mesh {
+    const isFemale = this.style.gender === 'female';
+    // Shoes - females have smaller, more refined shoes
     const shoe = this.createMesh(
-      new THREE.BoxGeometry(0.3, 0.1, 0.5),
+      new THREE.BoxGeometry(
+        isFemale ? 0.25 : 0.3,   // width
+        0.1,                      // height
+        isFemale ? 0.4 : 0.5     // depth
+      ),
       materials.shoe
     );
     const xPos = side === 'left' ? -0.2 : 0.2;

@@ -23,12 +23,13 @@ function generateTimestamp() {
 // Parse command line arguments
 const args = process.argv.slice(2);
 const composition = args[0] || 'JungleWalk';
-const configType = args[1] || 'deep'; // 'default' or 'deep'
+const configType = args[1] || 'deep'; // 'default', 'deep', or 'simple'
 const glFlag = args[2] || '--gl=angle';
 
 // Generate filename with timestamp
 const timestamp = generateTimestamp();
-const configPrefix = configType === 'deep' ? 'DeepConversation_' : '';
+const configPrefix = configType === 'deep' ? 'DeepConversation_' : 
+                    configType === 'simple' ? 'SimpleConversation_' : '';
 const filename = composition === 'CinematicJungleWalk' 
   ? `${configPrefix}CinematicJungleWalk_${timestamp}.mp4`
   : `${configPrefix}JungleWalk_${timestamp}.mp4`;
@@ -36,8 +37,8 @@ const filename = composition === 'CinematicJungleWalk'
 const outputPath = `out/${filename}`;
 
 // Build props for the config
-const props = configType === 'deep' 
-  ? `--props='{"configType":"deep"}'`
+const props = configType !== 'default' 
+  ? `--props='{"configType":"${configType}"}'`
   : '';
 
 // Build the render command

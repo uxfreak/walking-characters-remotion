@@ -1,6 +1,6 @@
 import { CalculateMetadataFunction } from 'remotion';
 import { parseMedia } from '@remotion/media-parser';
-import { SceneConfig, ConversationSegment, CameraSequenceItem, defaultSceneConfig, deepConversationConfig } from '../data/sceneConfig';
+import { SceneConfig, ConversationSegment, CameraSequenceItem, defaultSceneConfig, deepConversationConfig, simpleConversationConfig } from '../data/sceneConfig';
 import { Speaker } from '../components/characters/CharacterAnimations';
 
 export interface JungleWalkProps {
@@ -9,7 +9,7 @@ export interface JungleWalkProps {
   width?: number;
   height?: number;
   backgroundAudio?: string;
-  configType?: 'default' | 'deep';
+  configType?: 'default' | 'deep' | 'simple';
 }
 
 // Calculate dynamic duration based on audio files or conversation timing
@@ -21,7 +21,11 @@ export const calculateJungleWalkMetadata: CalculateMetadataFunction<JungleWalkPr
   let totalDurationInFrames = 900; // Default 30 seconds
   
   // Select the appropriate config based on configType
-  const baseConfig = props.configType === 'deep' ? deepConversationConfig : defaultSceneConfig;
+  const baseConfig = props.configType === 'simple' 
+    ? simpleConversationConfig 
+    : props.configType === 'deep' 
+    ? deepConversationConfig 
+    : defaultSceneConfig;
   const sceneConfig = props.sceneConfig || baseConfig;
   
   // If backgroundAudio is provided, use its duration
