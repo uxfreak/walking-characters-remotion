@@ -1,5 +1,5 @@
 import React from 'react';
-import { useCurrentFrame, useVideoConfig, interpolate } from 'remotion';
+import { useCurrentFrame, useVideoConfig, interpolate, Audio, staticFile, Sequence } from 'remotion';
 import WalkingCharactersScene from '../WalkingCharactersScene';
 import { CameraShots } from '../constants/cameraShots';
 import { JungleWalkProps, getSpeakerAtFrame, getCurrentText, getCameraShot } from '../utils/metadataCalculator';
@@ -80,13 +80,32 @@ export const JungleWalk: React.FC<JungleWalkProps> = (props) => {
       
       {/* Background Audio */}
       {props.backgroundAudio && (
-        <audio 
-          src={props.backgroundAudio}
-          style={{ display: 'none' }}
-          autoPlay
+        <Audio 
+          src={staticFile(props.backgroundAudio)}
+          volume={0.3}
           loop
         />
       )}
+      
+      {/* Dialogue Audio - Use Sequence for proper timing */}
+      {sceneConfig.conversation.map((segment, index) => {
+        if (segment.audioSrc) {
+          return (
+            <Sequence
+              key={`audio-seq-${index}`}
+              from={segment.start}
+              durationInFrames={segment.end - segment.start}
+              layout="none"
+            >
+              <Audio
+                src={staticFile(segment.audioSrc)}
+                volume={1}
+              />
+            </Sequence>
+          );
+        }
+        return null;
+      })}
     </div>
   );
 };

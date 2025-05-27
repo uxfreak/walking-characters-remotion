@@ -38,4 +38,4 @@ Thumbs.db
 .remotion/
 
 # TypeScript
-*.tsbuildinfo
+*.tsbuildinfo.env

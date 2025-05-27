@@ -1,0 +1,53 @@
+{
+  "name": "Tech Founders Chat",
+  "description": "Two tech founders discussing the future of AI",
+  "cameraSequence": [
+    { "shotName": "wide", "start": 0, "end": 150 },
+    { "shotName": "character1Focus", "start": 150, "end": 300 },
+    { "shotName": "character2Focus", "start": 300, "end": 450 },
+    { "shotName": "closeUp", "start": 450, "end": 600 },
+    { "shotName": "sideProfile", "start": 600, "end": 750 },
+    { "shotName": "tracking", "start": 750, "end": 900 }
+  ],
+  "conversation": [
+    { "start": 0, "end": 150, "speaker": "CHARACTER_1", "text": "You know, Priya, AI is evolving faster than we predicted. What excites you most?" },
+    { "start": 150, "end": 300, "speaker": "CHARACTER_2", "text": "The democratization of AI tools! Now anyone can build powerful applications without deep technical knowledge." },
+    { "start": 300, "end": 450, "speaker": "CHARACTER_1", "text": "Absolutely! But we need to ensure ethical guidelines keep pace with the technology." },
+    { "start": 450, "end": 600, "speaker": "CHARACTER_2", "text": "That's why our startup focuses on explainable AI - transparency is key to trust." },
+    { "start": 600, "end": 750, "speaker": "CHARACTER_1", "text": "Smart approach. The future belongs to companies that prioritize both innovation and responsibility." },
+    { "start": 750, "end": 900, "speaker": "BOTH", "text": "Let's build that future together!" }
+  ],
+  "characters": {
+    "character1": {
+      "name": "Raj",
+      "gender": "male",
+      "primaryColor": "#0ea5e9",
+      "secondaryColor": "#0284c7",
+      "hairColor": "#1a1a1a",
+      "skinTone": "#d4a574",
+      "audioConfig": {
+        "voice": "alloy",
+        "voiceInstructions": "Enthusiastic tech entrepreneur, speaks with passion about technology. Confident and visionary, with occasional excitement in voice when discussing innovation.",
+        "speed": 1.05
+      }
+    },
+    "character2": {
+      "name": "Priya",
+      "gender": "female",
+      "primaryColor": "#f97316",
+      "secondaryColor": "#ea580c",
+      "hairColor": "#0f0f0f",
+      "skinTone": "#c19a6b",
+      "audioConfig": {
+        "voice": "shimmer",
+        "voiceInstructions": "Smart and articulate tech founder, speaks with clarity and conviction. Thoughtful pauses when making important points, warm but professional tone.",
+        "speed": 1.0
+      }
+    }
+  },
+  "audioSettings": {
+    "generateVoiceover": true,
+    "model": "gpt-4o-mini-tts",
+    "globalSpeed": 1.0
+  }
+}
