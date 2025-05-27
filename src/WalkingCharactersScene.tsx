@@ -6,6 +6,7 @@ import { Character } from './components/characters/Character';
 import { CharacterAnimations, Speaker } from './components/characters/CharacterAnimations';
 import { JungleEnvironment } from './components/environment/Jungle';
 import { CameraShot } from './constants/cameraShots';
+import { CharacterStyle } from './data/sceneConfig';
 
 export interface WalkingCharactersSceneProps {
   frame?: number;
@@ -13,6 +14,8 @@ export interface WalkingCharactersSceneProps {
   currentSpeaker?: Speaker;
   cameraShot?: CameraShot;
   enableControls?: boolean; // For development/preview
+  character1Style?: CharacterStyle;
+  character2Style?: CharacterStyle;
 }
 
 export default function WalkingCharactersScene({ 
@@ -20,7 +23,9 @@ export default function WalkingCharactersScene({
   fps = 30,
   currentSpeaker = Speaker.NONE,
   cameraShot,
-  enableControls = false
+  enableControls = false,
+  character1Style,
+  character2Style
 }: WalkingCharactersSceneProps) {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const sceneSetupRef = useRef<SceneSetup | null>(null);
@@ -145,14 +150,14 @@ export default function WalkingCharactersScene({
     const jungle = new JungleEnvironment(sceneSetup.scene, 12345);
     jungleRef.current = jungle;
     
-    // Create characters
-    const character1 = new Character();
+    // Create characters with styles
+    const character1 = new Character(character1Style);
     character1.position.set(-0.8, 0, 0);
     const character1Animations = new CharacterAnimations(character1, 0);
     character1Ref.current = { character: character1, animations: character1Animations };
     sceneSetup.scene.add(character1);
     
-    const character2 = new Character();
+    const character2 = new Character(character2Style);
     character2.position.set(0.8, 0, 0);
     const character2Animations = new CharacterAnimations(character2, Math.PI);
     character2Ref.current = { character: character2, animations: character2Animations };
@@ -173,7 +178,7 @@ export default function WalkingCharactersScene({
         controlsRef.current.dispose();
       }
     };
-  }, []);
+  }, [character1Style, character2Style]);
   
   // Update animation when frame or speaker changes
   useEffect(() => {

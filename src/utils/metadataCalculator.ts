@@ -1,6 +1,6 @@
 import { CalculateMetadataFunction } from 'remotion';
 import { parseMedia } from '@remotion/media-parser';
-import { SceneConfig, ConversationSegment, CameraSequenceItem } from '../data/sceneConfig';
+import { SceneConfig, ConversationSegment, CameraSequenceItem, defaultSceneConfig, deepConversationConfig } from '../data/sceneConfig';
 import { Speaker } from '../components/characters/CharacterAnimations';
 
 export interface JungleWalkProps {
@@ -9,6 +9,7 @@ export interface JungleWalkProps {
   width?: number;
   height?: number;
   backgroundAudio?: string;
+  configType?: 'default' | 'deep';
 }
 
 // Calculate dynamic duration based on audio files or conversation timing
@@ -18,6 +19,10 @@ export const calculateJungleWalkMetadata: CalculateMetadataFunction<JungleWalkPr
 }) => {
   const fps = props.fps || 30;
   let totalDurationInFrames = 900; // Default 30 seconds
+  
+  // Select the appropriate config based on configType
+  const baseConfig = props.configType === 'deep' ? deepConversationConfig : defaultSceneConfig;
+  const sceneConfig = props.sceneConfig || baseConfig;
   
   // If backgroundAudio is provided, use its duration
   if (props.backgroundAudio) {
@@ -39,13 +44,13 @@ export const calculateJungleWalkMetadata: CalculateMetadataFunction<JungleWalkPr
   }
   
   // Calculate conversation and camera sequence timing based on audio segments
-  let processedConfig = props.sceneConfig;
+  let processedConfig = sceneConfig;
   
-  if (props.sceneConfig?.conversation) {
+  if (sceneConfig?.conversation) {
     let cumulativeTime = 0;
     const processedConversation: ConversationSegment[] = [];
     
-    for (const segment of props.sceneConfig.conversation) {
+    for (const segment of sceneConfig.conversation) {
       let segmentDuration = 90; // Default 3 seconds per segment
       
       // If audio file is provided for this segment, use its duration
@@ -83,20 +88,20 @@ export const calculateJungleWalkMetadata: CalculateMetadataFunction<JungleWalkPr
     
     // Adjust camera sequence to match conversation timing
     const processedCameraSequence: CameraSequenceItem[] = [];
-    const segmentDuration = Math.floor(totalDurationInFrames / props.sceneConfig.cameraSequence.length);
+    const segmentDuration = Math.floor(totalDurationInFrames / sceneConfig.cameraSequence.length);
     
-    props.sceneConfig.cameraSequence.forEach((shot, index) => {
+    sceneConfig.cameraSequence.forEach((shot, index) => {
       processedCameraSequence.push({
         ...shot,
         start: index * segmentDuration,
-        end: index === props.sceneConfig!.cameraSequence.length - 1 
+        end: index === sceneConfig.cameraSequence.length - 1 
           ? totalDurationInFrames 
           : (index + 1) * segmentDuration,
       });
     });
     
     processedConfig = {
-      ...props.sceneConfig,
+      ...sceneConfig,
       conversation: processedConversation,
       cameraSequence: processedCameraSequence,
     };

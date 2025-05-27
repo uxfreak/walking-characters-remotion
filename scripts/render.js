@@ -23,22 +23,29 @@ function generateTimestamp() {
 // Parse command line arguments
 const args = process.argv.slice(2);
 const composition = args[0] || 'JungleWalk';
-const outputType = args[1] || 'standard'; // 'standard' or 'cinematic'
+const configType = args[1] || 'deep'; // 'default' or 'deep'
 const glFlag = args[2] || '--gl=angle';
 
 // Generate filename with timestamp
 const timestamp = generateTimestamp();
-const filename = outputType === 'cinematic' 
-  ? `CinematicJungleWalk_${timestamp}.mp4`
-  : `JungleWalk_${timestamp}.mp4`;
+const configPrefix = configType === 'deep' ? 'DeepConversation_' : '';
+const filename = composition === 'CinematicJungleWalk' 
+  ? `${configPrefix}CinematicJungleWalk_${timestamp}.mp4`
+  : `${configPrefix}JungleWalk_${timestamp}.mp4`;
 
 const outputPath = `out/${filename}`;
 
+// Build props for the config
+const props = configType === 'deep' 
+  ? `--props='{"configType":"deep"}'`
+  : '';
+
 // Build the render command
-const renderCommand = `npx remotion render ${composition} ${outputPath} ${glFlag}`;
+const renderCommand = `npx remotion render ${composition} ${outputPath} ${glFlag} ${props}`.trim();
 
 console.log(`🎬 Rendering ${composition} to ${outputPath}`);
 console.log(`⚡ Using WebGL: ${glFlag}`);
+console.log(`💬 Config: ${configType} conversation`);
 console.log(`📅 Timestamp: ${timestamp}`);
 console.log(`🔧 Command: ${renderCommand}\n`);
 

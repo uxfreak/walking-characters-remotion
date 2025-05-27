@@ -51,6 +51,8 @@ export const JungleWalk: React.FC<JungleWalkProps> = (props) => {
         currentSpeaker={currentSpeaker}
         cameraShot={currentShot}
         enableControls={false}
+        character1Style={sceneConfig.characters?.character1}
+        character2Style={sceneConfig.characters?.character2}
       />
       
       {/* Subtitles */}

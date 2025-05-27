@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { CharacterMaterials } from '../../constants/materials';
 import { degreesToRadians } from '../../utils/math';
+import { CharacterStyle } from '../../data/sceneConfig';
 
 export interface CharacterParts {
   headGroup: THREE.Group;
@@ -17,17 +18,47 @@ export interface CharacterParts {
 
 export class Character extends THREE.Group {
   public parts: CharacterParts;
+  private style: CharacterStyle;
   
-  constructor() {
+  constructor(style?: CharacterStyle) {
     super();
+    
+    // Default style if none provided
+    this.style = style || {
+      name: 'Default',
+      primaryColor: '#4f46e5', // Default indigo
+      secondaryColor: '#3730a3', // Dark indigo
+      hairColor: '#8b4513', // Brown
+      skinTone: '#deb887' // Light skin
+    };
+    
     this.parts = this.createCharacter();
   }
   
+  private createCustomMaterials() {
+    return {
+      shirt: new THREE.MeshPhongMaterial({ color: this.style.primaryColor }),
+      pants: new THREE.MeshPhongMaterial({ color: this.style.secondaryColor }),
+      skin: new THREE.MeshPhongMaterial({ color: this.style.skinTone }),
+      hair: new THREE.MeshPhongMaterial({ color: this.style.hairColor }),
+      mouth: CharacterMaterials.mouth,
+      nose: CharacterMaterials.nose,
+      eyeWhite: CharacterMaterials.eyeWhite,
+      pupil: CharacterMaterials.pupil,
+      eyeHighlight: CharacterMaterials.eyeHighlight,
+      eyebrow: new THREE.MeshPhongMaterial({ color: this.style.hairColor }),
+      shoe: CharacterMaterials.shoe
+    };
+  }
+  
   private createCharacter(): CharacterParts {
+    // Create custom materials based on style
+    const customMaterials = this.createCustomMaterials();
+    
     // Torso - shirt
     const torsoShirt = this.createMesh(
       new THREE.CylinderGeometry(0.4, 0.5, 1.2, 16),
-      CharacterMaterials.shirt
+      customMaterials.shirt
     );
     torsoShirt.position.y = 0.75;
     this.add(torsoShirt);
@@ -35,7 +66,7 @@ export class Character extends THREE.Group {
     // Torso - pants
     const torsoPants = this.createMesh(
       new THREE.CylinderGeometry(0.45, 0.5, 0.9, 16),
-      CharacterMaterials.pants
+      customMaterials.pants
     );
     torsoPants.position.y = 0.15;
     this.add(torsoPants);
@@ -43,31 +74,31 @@ export class Character extends THREE.Group {
     // Shoulders/neck
     const shoulders = this.createMesh(
       new THREE.SphereGeometry(0.35, 16, 8),
-      CharacterMaterials.skin
+      customMaterials.skin
     );
     shoulders.position.y = 1.4;
     shoulders.scale.set(1, 0.6, 1);
     this.add(shoulders);
     
     // Create head
-    const headGroup = this.createHead();
+    const headGroup = this.createHead(customMaterials);
     this.add(headGroup);
     
     // Create arms
-    const { leftArmGroup, leftForearmGroup } = this.createArm('left');
-    const { rightArmGroup, rightForearmGroup } = this.createArm('right');
+    const { armGroup: leftArmGroup, forearmGroup: leftForearmGroup } = this.createArm('left', customMaterials);
+    const { armGroup: rightArmGroup, forearmGroup: rightForearmGroup } = this.createArm('right', customMaterials);
     this.add(leftArmGroup);
     this.add(rightArmGroup);
     
     // Create legs
-    const leftLegGroup = this.createLeg('left');
-    const rightLegGroup = this.createLeg('right');
+    const leftLegGroup = this.createLeg('left', customMaterials);
+    const rightLegGroup = this.createLeg('right', customMaterials);
     this.add(leftLegGroup);
     this.add(rightLegGroup);
     
     // Create shoes
-    const leftShoe = this.createShoe('left');
-    const rightShoe = this.createShoe('right');
+    const leftShoe = this.createShoe('left', customMaterials);
+    const rightShoe = this.createShoe('right', customMaterials);
     this.add(leftShoe);
     this.add(rightShoe);
     
@@ -94,37 +125,37 @@ export class Character extends THREE.Group {
     return mesh;
   }
   
-  private createHead(): THREE.Group {
+  private createHead(materials: any): THREE.Group {
     const headGroup = new THREE.Group();
     headGroup.position.y = 2.2;
     
     // Head
     const head = this.createMesh(
       new THREE.SphereGeometry(0.48, 20, 20),
-      CharacterMaterials.skin
+      materials.skin
     );
     headGroup.add(head);
     
     // Hair
     const hair = this.createMesh(
       new THREE.CylinderGeometry(0.48, 0.4, 0.33, 16),
-      CharacterMaterials.hair
+      materials.hair
     );
     hair.position.set(0, 0.4, -0.08);
     hair.rotation.x = degreesToRadians(-3);
     headGroup.add(hair);
     
     // Face features
-    this.addFaceFeatures(headGroup);
+    this.addFaceFeatures(headGroup, materials);
     
     return headGroup;
   }
   
-  private addFaceFeatures(headGroup: THREE.Group): void {
+  private addFaceFeatures(headGroup: THREE.Group, materials: any): void {
     // Mouth
     const mouth = this.createMesh(
       new THREE.SphereGeometry(0.08, 12, 8),
-      CharacterMaterials.mouth
+      materials.mouth
     );
     mouth.name = 'mouth';
     mouth.position.set(0, -0.22, 0.45);
@@ -134,20 +165,20 @@ export class Character extends THREE.Group {
     // Nose
     const nose = this.createMesh(
       new THREE.SphereGeometry(0.04, 8, 8),
-      CharacterMaterials.nose
+      materials.nose
     );
     nose.position.set(0, -0.08, 0.47);
     headGroup.add(nose);
     
     // Eyes
-    const eyeGroup = this.createEyes();
+    const eyeGroup = this.createEyes(materials);
     headGroup.add(eyeGroup);
     
     // Eyebrows
-    this.createEyebrows(headGroup);
+    this.createEyebrows(headGroup, materials);
   }
   
-  private createEyes(): THREE.Group {
+  private createEyes(materials: any): THREE.Group {
     const eyeGroup = new THREE.Group();
     
     const eyePositions = [
@@ -159,7 +190,7 @@ export class Character extends THREE.Group {
       // Eye white
       const eyeWhite = this.createMesh(
         new THREE.SphereGeometry(0.09, 12, 8),
-        CharacterMaterials.eyeWhite
+        materials.eyeWhite
       );
       eyeWhite.position.set(pos.x, 0.08, 0.42);
       eyeWhite.scale.set(1, 0.8, 0.6);
@@ -168,7 +199,7 @@ export class Character extends THREE.Group {
       // Pupil
       const pupil = this.createMesh(
         new THREE.SphereGeometry(0.035, 12, 8),
-        CharacterMaterials.pupil
+        materials.pupil
       );
       pupil.position.set(pos.x, 0.08, 0.48);
       eyeGroup.add(pupil);
@@ -176,7 +207,7 @@ export class Character extends THREE.Group {
       // Highlight
       const highlight = this.createMesh(
         new THREE.SphereGeometry(0.015, 8, 8),
-        CharacterMaterials.eyeHighlight
+        materials.eyeHighlight
       );
       highlight.position.set(
         pos.x + (pos.name === 'left' ? 0.01 : -0.01), 
@@ -189,7 +220,7 @@ export class Character extends THREE.Group {
     return eyeGroup;
   }
   
-  private createEyebrows(headGroup: THREE.Group): void {
+  private createEyebrows(headGroup: THREE.Group, materials: any): void {
     const eyebrowPositions = [
       { x: -0.14, rotation: 0.1 },
       { x: 0.14, rotation: -0.1 }
@@ -198,7 +229,7 @@ export class Character extends THREE.Group {
     eyebrowPositions.forEach(pos => {
       const eyebrow = this.createMesh(
         new THREE.BoxGeometry(0.1, 0.025, 0.025),
-        CharacterMaterials.eyebrow
+        materials.eyebrow
       );
       eyebrow.position.set(pos.x, 0.18, 0.45);
       eyebrow.rotation.z = pos.rotation;
@@ -206,7 +237,7 @@ export class Character extends THREE.Group {
     });
   }
   
-  private createArm(side: 'left' | 'right'): { armGroup: THREE.Group; forearmGroup: THREE.Group } {
+  private createArm(side: 'left' | 'right', materials: any): { armGroup: THREE.Group; forearmGroup: THREE.Group } {
     const armGroup = new THREE.Group();
     const xPos = side === 'left' ? -0.4 : 0.4;
     armGroup.position.set(xPos, 1.2, 0);
@@ -214,7 +245,7 @@ export class Character extends THREE.Group {
     // Upper arm
     const upperArm = this.createMesh(
       new THREE.CylinderGeometry(0.12, 0.12, 0.6, 8),
-      CharacterMaterials.skin
+      materials.skin
     );
     upperArm.position.y = -0.3;
     armGroup.add(upperArm);
@@ -226,7 +257,7 @@ export class Character extends THREE.Group {
     // Forearm
     const forearm = this.createMesh(
       new THREE.CylinderGeometry(0.1, 0.12, 0.5, 8),
-      CharacterMaterials.skin
+      materials.skin
     );
     forearm.position.y = -0.25;
     forearmGroup.add(forearm);
@@ -234,7 +265,7 @@ export class Character extends THREE.Group {
     // Hand
     const hand = this.createMesh(
       new THREE.SphereGeometry(0.15, 8, 8),
-      CharacterMaterials.skin
+      materials.skin
     );
     hand.position.set(0, -0.5, 0);
     hand.scale.set(1, 0.8, 1);
@@ -245,14 +276,14 @@ export class Character extends THREE.Group {
     return { armGroup, forearmGroup };
   }
   
-  private createLeg(side: 'left' | 'right'): THREE.Group {
+  private createLeg(side: 'left' | 'right', materials: any): THREE.Group {
     const legGroup = new THREE.Group();
     const xPos = side === 'left' ? -0.2 : 0.2;
     legGroup.position.set(xPos, 0, 0);
     
     const leg = this.createMesh(
       new THREE.CylinderGeometry(0.15, 0.18, 1.2, 12),
-      CharacterMaterials.pants
+      materials.pants
     );
     leg.position.y = -0.6;
     legGroup.add(leg);
@@ -260,10 +291,10 @@ export class Character extends THREE.Group {
     return legGroup;
   }
   
-  private createShoe(side: 'left' | 'right'): THREE.Mesh {
+  private createShoe(side: 'left' | 'right', materials: any): THREE.Mesh {
     const shoe = this.createMesh(
       new THREE.BoxGeometry(0.3, 0.1, 0.5),
-      CharacterMaterials.shoe
+      materials.shoe
     );
     const xPos = side === 'left' ? -0.2 : 0.2;
     shoe.position.set(xPos, -1.25, 0);
