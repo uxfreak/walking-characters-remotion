@@ -45,59 +45,120 @@ export const BeachMaterials = {
   }),
 };
 
-class SimplePalmTree {
+class DetailedPalmTree {
   private mesh: THREE.Group;
 
-  constructor(x: number, z: number, scale: number = 1, seed: number = 0) {
+  constructor(x: number, z: number, seed: number = 0) {
     this.mesh = new THREE.Group();
-
-    // Trunk with better shape
-    const trunkGeometry = new THREE.CylinderGeometry(
-      0.3 * scale,
-      0.5 * scale,
-      6 * scale,
-      8
-    );
-    const trunk = new THREE.Mesh(trunkGeometry, BeachMaterials.palmTrunk);
-    trunk.position.y = 3 * scale;
+    
+    // Use seeded random for consistent tree generation
+    const random = this.createSeededRandom(seed);
+    
+    // Trunk with segments and slight curve
+    const trunkCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0, 0, 0),
+      new THREE.Vector3(0.2 + random() * 0.2, 2, 0),
+      new THREE.Vector3(0.1 + random() * 0.2, 4, 0.1 + random() * 0.1),
+      new THREE.Vector3(0, 6, 0),
+      new THREE.Vector3(-0.1 + random() * 0.2, 8, 0)
+    ]);
+    
+    const trunkGeometry = new THREE.TubeGeometry(trunkCurve, 20, 0.5, 8, false);
+    const trunkMaterial = new THREE.MeshStandardMaterial({ 
+      color: 0x8B4513,
+      roughness: 0.8,
+      metalness: 0
+    });
+    const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
     trunk.castShadow = true;
     this.mesh.add(trunk);
-
-    // Create palm fronds using planes for a more realistic look
-    const frondCount = 8;
-    for (let i = 0; i < frondCount; i++) {
-      const angle = (i / frondCount) * Math.PI * 2;
-
-      // Create a frond group
-      const frondGroup = new THREE.Group();
-
-      // Main stem of the frond
-      const stemGeometry = new THREE.PlaneGeometry(0.2 * scale, 4 * scale);
-      const stem = new THREE.Mesh(stemGeometry, BeachMaterials.palmLeaves);
-      stem.position.y = 2 * scale;
-      frondGroup.add(stem);
-
-      // Add leaves along the stem
-      for (let j = 0; j < 6; j++) {
-        const leafGeometry = new THREE.PlaneGeometry(0.8 * scale, 0.5 * scale);
-        const leaf = new THREE.Mesh(leafGeometry, BeachMaterials.palmLeaves);
-        leaf.position.y = (1 + j * 0.5) * scale;
-        leaf.position.x = (j % 2 === 0 ? 0.4 : -0.4) * scale;
-        leaf.rotation.z = j % 2 === 0 ? 0.3 : -0.3;
-        frondGroup.add(leaf);
+    
+    // Palm fronds with curved geometry
+    const leafMaterial = new THREE.MeshStandardMaterial({ 
+      color: 0x228B22,
+      side: THREE.DoubleSide,
+      roughness: 0.7,
+      metalness: 0
+    });
+    
+    for (let i = 0; i < 8; i++) {
+      const frond = new THREE.Group();
+      
+      // Create curved frond spine with some variation
+      const curve1 = 2 + random() * 1;
+      const curve2 = 4 + random() * 1;
+      const curve3 = 5.5 + random() * 0.5;
+      
+      const frondCurve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(curve1, -0.5, 0),
+        new THREE.Vector3(curve2, -1.5, 0),
+        new THREE.Vector3(curve3, -2.5, 0)
+      ]);
+      
+      // Create frond geometry with leaflets
+      const frondShape = new THREE.Shape();
+      frondShape.moveTo(0, 0);
+      
+      // Create leaflet pattern
+      for (let j = 0; j < 20; j++) {
+        const t = j / 20;
+        const point = frondCurve.getPoint(t);
+        const width = (1 - t) * 0.8;
+        
+        if (j % 2 === 0) {
+          frondShape.lineTo(point.x + width, point.y + width * 0.3);
+        } else {
+          frondShape.lineTo(point.x - width, point.y - width * 0.3);
+        }
       }
-
-      frondGroup.position.y = 6 * scale;
-      frondGroup.rotation.y = angle;
-      frondGroup.rotation.z = Math.PI / 4;
-      this.mesh.add(frondGroup);
+      
+      const frondGeometry = new THREE.ShapeGeometry(frondShape);
+      const frondMesh = new THREE.Mesh(frondGeometry, leafMaterial);
+      frondMesh.castShadow = true;
+      
+      frond.add(frondMesh);
+      frond.position.y = 8;
+      frond.rotation.y = (Math.PI * 2 / 8) * i + random() * 0.2;
+      frond.rotation.z = Math.PI / 8 + random() * 0.2;
+      
+      this.mesh.add(frond);
     }
-
+    
+    // Add coconuts
+    const coconutMaterial = new THREE.MeshStandardMaterial({ 
+      color: 0x8B4513,
+      roughness: 0.9,
+      metalness: 0
+    });
+    for (let i = 0; i < 4; i++) {
+      const coconut = new THREE.Mesh(
+        new THREE.SphereGeometry(0.3, 8, 6),
+        coconutMaterial
+      );
+      coconut.position.set(
+        random() * 1 - 0.5,
+        7.5 + random() * 0.5,
+        random() * 1 - 0.5
+      );
+      coconut.castShadow = true;
+      this.mesh.add(coconut);
+    }
+    
     this.mesh.position.set(x, 0, z);
-    this.mesh.rotation.y = seed * Math.PI;
+    this.mesh.castShadow = true;
+    this.mesh.receiveShadow = true;
   }
 
-  getMesh(): THREE.Group {
+  private createSeededRandom(seed: number): () => number {
+    let state = seed;
+    return () => {
+      state = (state * 1664525 + 1013904223) % Math.pow(2, 32);
+      return state / Math.pow(2, 32);
+    };
+  }
+
+  public getMesh(): THREE.Group {
     return this.mesh;
   }
 }
@@ -122,7 +183,7 @@ export class BeachEnvironment extends BaseEnvironment {
   private waterPlane: THREE.Mesh;
   private horizonWater: THREE.Mesh;
   private path: BeachPath;
-  private palmTrees: SimplePalmTree[] = [];
+  private palmTrees: DetailedPalmTree[] = [];
   private sun: THREE.Mesh;
   private waves: { mesh: THREE.Mesh; offset: number }[] = [];
   private seagulls: {
@@ -134,6 +195,7 @@ export class BeachEnvironment extends BaseEnvironment {
   }[] = [];
   private mountains: { mesh: THREE.Group; originalZ: number }[] = [];
   private waveTime: number = 0;
+  private tidalWaves: { mesh: THREE.Mesh; offset: number; originalZ: number }[] = [];
 
   constructor(scene: THREE.Scene, seed: number = 12345) {
     super(scene, BeachConfig, seed);
@@ -162,11 +224,11 @@ export class BeachEnvironment extends BaseEnvironment {
         const z = beachVertices[i + 1];
 
         let height = 0;
-        if (x < 15) {
-          height = 0; // Flat beach area
+        if (x < 1) {
+          height = 0; // Flat beach area where characters walk
         } else {
-          // Gradual slope down to water
-          height = -(x - 15) * 0.05;
+          // Gradual slope down to water - shoreline at x=1
+          height = -(x - 1) * 0.1;
         }
 
         // Add small sand ripples
@@ -187,14 +249,14 @@ export class BeachEnvironment extends BaseEnvironment {
 
       // Create wet sand area
       const wetSandGeometry = new THREE.PlaneGeometry(
-        40,
+        4, // Much narrower wet sand strip
         sectionLength,
-        20,
+        10,
         50
       );
       const wetSand = new THREE.Mesh(wetSandGeometry, BeachMaterials.wetSand);
       wetSand.rotation.x = -Math.PI / 2;
-      wetSand.position.set(15, -0.5, section * sectionLength);
+      wetSand.position.set(0.5, -0.3, section * sectionLength); // Right where characters walk
       wetSand.receiveShadow = true;
       this.wetSandSections.push(wetSand);
       scene.add(wetSand);
@@ -204,7 +266,7 @@ export class BeachEnvironment extends BaseEnvironment {
     const waterGeometry = new THREE.PlaneGeometry(300, 600, 80, 80);
     this.waterPlane = new THREE.Mesh(waterGeometry, BeachMaterials.water);
     this.waterPlane.rotation.x = -Math.PI / 2;
-    this.waterPlane.position.set(100, -1, 0);
+    this.waterPlane.position.set(2, -1, 0); // Right next to characters
     scene.add(this.waterPlane);
 
     // Add horizon water
@@ -214,11 +276,17 @@ export class BeachEnvironment extends BaseEnvironment {
       BeachMaterials.water
     );
     this.horizonWater.rotation.x = -Math.PI / 2;
-    this.horizonWater.position.set(200, -1.5, 0);
+    this.horizonWater.position.set(25, -1.5, 0); // Closer horizon
     scene.add(this.horizonWater);
 
     // Create waves
     this.createWaves();
+
+    // Create tidal waves that reach the wet sand
+    this.createTidalWaves();
+
+    // Create palm trees
+    this.createPalmTrees();
 
     // Create sun
     this.createSun();
@@ -290,8 +358,93 @@ export class BeachEnvironment extends BaseEnvironment {
   }
 
   private createWaves(): void {
-    // Waves are now handled purely through water vertex animation
-    // No foam meshes are created
+    const random = this.createSeededRandom(this.seed);
+
+    // Create animated wave meshes (no foam, just water waves)
+    for (let section = -1; section <= 1; section++) {
+      for (let i = 0; i < 4; i++) {
+        const waveGeometry = new THREE.CylinderGeometry(0.1, 0.8, 0.3, 8);
+        const wave = new THREE.Mesh(waveGeometry, BeachMaterials.water);
+
+        // Position waves right at the shoreline
+        wave.position.set(
+          1.5 + i * 0.5 + random() * 0.3, // Right next to characters
+          -0.8, // Slightly below water surface
+          section * 200 + i * 30 + random() * 20
+        );
+
+        // Rotate to lay flat and add some variation
+        wave.rotation.x = Math.PI / 2;
+        wave.rotation.z = random() * Math.PI * 2;
+        wave.scale.x = 0.8 + random() * 0.4;
+        wave.scale.z = 0.6 + random() * 0.6;
+
+        this.waves.push({
+          mesh: wave,
+          offset: random() * Math.PI * 2,
+        });
+        this.scene.add(wave);
+      }
+    }
+  }
+
+  private createTidalWaves(): void {
+    const random = this.createSeededRandom(this.seed + 200);
+    
+    // Create tidal wave meshes that periodically wash up onto the wet sand
+    for (let section = -1; section <= 1; section++) {
+      for (let i = 0; i < 3; i++) {
+        // Create a flat water plane for tidal waves near characters
+        const tidalGeometry = new THREE.PlaneGeometry(6, 40, 10, 10); // Much smaller for close shoreline
+        const tidalWave = new THREE.Mesh(tidalGeometry, BeachMaterials.water);
+        
+        // Position to cover from water to character area
+        tidalWave.position.set(
+          -1, // Positioned to reach character area
+          -0.7, // Slightly above the wet sand
+          section * 200 + i * 60 + random() * 30
+        );
+        
+        tidalWave.rotation.x = -Math.PI / 2;
+        tidalWave.rotation.z = (random() - 0.5) * 0.1; // Slight angle variation
+        
+        // Make initially invisible/transparent
+        (tidalWave.material as THREE.MeshStandardMaterial).transparent = true;
+        (tidalWave.material as THREE.MeshStandardMaterial).opacity = 0;
+        
+        this.tidalWaves.push({
+          mesh: tidalWave,
+          offset: random() * Math.PI * 2,
+          originalZ: tidalWave.position.z
+        });
+        this.scene.add(tidalWave);
+      }
+    }
+  }
+
+  private createPalmTrees(): void {
+    const random = this.createSeededRandom(this.seed + 300);
+    
+    // Create palm trees along both sides of the beach
+    for (let section = -1; section <= 1; section++) {
+      // Trees on the left side (character side)
+      for (let i = 0; i < 3; i++) {
+        const x = -15 + random() * 10; // Left side of characters
+        const z = section * 200 + i * 60 + random() * 40;
+        const tree = new DetailedPalmTree(x, z, this.seed + section * 100 + i);
+        this.palmTrees.push(tree);
+        this.scene.add(tree.getMesh());
+      }
+      
+      // Trees on the right side (near water but not blocking view)
+      for (let i = 0; i < 2; i++) {
+        const x = 8 + random() * 5; // Right side near water
+        const z = section * 200 + i * 80 + random() * 30;
+        const tree = new DetailedPalmTree(x, z, this.seed + section * 100 + i + 50);
+        this.palmTrees.push(tree);
+        this.scene.add(tree.getMesh());
+      }
+    }
   }
 
   private createSun(): void {
@@ -359,8 +512,7 @@ export class BeachEnvironment extends BaseEnvironment {
       for (let i = 0; i < 4; i++) {
         const x = -30 + random() * 20;
         const z = section * 200 + i * 40 + random() * 20;
-        const scale = 0.8 + random() * 0.4;
-        const palmTree = new SimplePalmTree(x, z, scale, random() * 1000);
+        const palmTree = new DetailedPalmTree(x, z, this.seed + section * 100 + i);
         this.palmTrees.push(palmTree);
         this.scene.add(palmTree.getMesh());
       }
@@ -369,8 +521,7 @@ export class BeachEnvironment extends BaseEnvironment {
       for (let i = 0; i < 2; i++) {
         const x = 5 + random() * 10;
         const z = section * 200 + i * 60 + random() * 30;
-        const scale = 0.7 + random() * 0.3;
-        const palmTree = new SimplePalmTree(x, z, scale, random() * 1000);
+        const palmTree = new DetailedPalmTree(x, z, this.seed + section * 100 + i + 50);
         this.palmTrees.push(palmTree);
         this.scene.add(palmTree.getMesh());
       }
@@ -520,31 +671,140 @@ export class BeachEnvironment extends BaseEnvironment {
       }
     });
 
-    // Update wave time for water animation
-    this.waveTime += 0.016;
+    // Update wave time based on frame distance (deterministic)
+    this.waveTime = totalDistance * 0.1; // Tied to frame progression
 
-    // Animate water surface
+    // Animate water surface - frame-based timing
+    const frameTime = this.waveTime;
     const waterVertices = this.waterPlane.geometry.attributes.position.array;
     for (let i = 0; i < waterVertices.length; i += 3) {
       const x = waterVertices[i];
       const z = waterVertices[i + 1];
       waterVertices[i + 2] =
-        Math.sin(x * 0.1 + this.waveTime) * 0.3 +
-        Math.sin(z * 0.1 + this.waveTime * 1.5) * 0.2;
+        Math.sin(x * 0.1 + frameTime) * 0.3 +
+        Math.sin(z * 0.1 + frameTime * 1.5) * 0.2;
     }
     this.waterPlane.geometry.attributes.position.needsUpdate = true;
 
-    // Animate horizon water
+    // Animate horizon water - frame-based timing
     const horizonVertices =
       this.horizonWater.geometry.attributes.position.array;
     for (let i = 0; i < horizonVertices.length; i += 3) {
       const x = horizonVertices[i];
       const z = horizonVertices[i + 1];
       horizonVertices[i + 2] =
-        Math.sin(x * 0.05 + this.waveTime * 0.8) * 0.2 +
-        Math.sin(z * 0.05 + this.waveTime * 1.2) * 0.15;
+        Math.sin(x * 0.05 + frameTime * 0.8) * 0.2 +
+        Math.sin(z * 0.05 + frameTime * 1.2) * 0.15;
     }
     this.horizonWater.geometry.attributes.position.needsUpdate = true;
+
+    // Animate waves (come and go effect) - frame-based animation
+    this.waves.forEach((waveData) => {
+      const wave = waveData.mesh;
+
+      // Frame-based wave timing (deterministic)
+      const frameTime = this.waveTime;
+
+      // Wave motion - rise and fall with sine wave
+      const waveHeight = Math.sin(frameTime * 1.5 + waveData.offset) * 0.4;
+      wave.position.y = -0.8 + Math.max(0, waveHeight); // Only show when above water level
+
+      // Scale animation - waves grow and shrink
+      const scaleAnimation =
+        Math.sin(frameTime * 2 + waveData.offset) * 0.3 + 0.7;
+      wave.scale.y = Math.max(0.1, scaleAnimation);
+
+      // Opacity animation - waves fade in and out
+      const opacity = Math.max(
+        0,
+        Math.sin(frameTime * 1.2 + waveData.offset) * 0.8 + 0.2
+      );
+      (wave.material as THREE.MeshStandardMaterial).opacity = opacity;
+      (wave.material as THREE.MeshStandardMaterial).transparent = true;
+
+      // Infinite scrolling for waves
+      const originalZ = wave.userData.originalZ || wave.position.z;
+      if (!wave.userData.originalZ) {
+        wave.userData.originalZ = originalZ;
+      }
+
+      const sectionOffset =
+        Math.floor(originalZ / sectionLength) * sectionLength;
+      const localZ = originalZ % sectionLength;
+      const newZ = sectionOffset + localZ - (totalDistance % sectionLength);
+
+      if (newZ < -sectionLength) {
+        wave.position.z = newZ + sectionLength * 3;
+      } else if (newZ > sectionLength) {
+        wave.position.z = newZ - sectionLength * 3;
+      } else {
+        wave.position.z = newZ;
+      }
+    });
+
+    // Animate tidal waves that wash up onto wet sand
+    this.tidalWaves.forEach((tidalData) => {
+      const tidalWave = tidalData.mesh;
+      const material = tidalWave.material as THREE.MeshStandardMaterial;
+      
+      // Slow tidal cycle - frame-based timing (deterministic)
+      const frameTime = this.waveTime;
+      const tidalCycle = Math.sin(frameTime * 0.3 + tidalData.offset);
+      
+      if (tidalCycle > 0) {
+        // Wave is coming in - starts from ocean and sweeps toward characters
+        const progress = tidalCycle; // 0 to 1
+        
+        // Wave sweeps from water edge (X=2) toward characters (X=0)
+        const maxReach = 3; // Distance from water (X=2) to characters (X=0)
+        tidalWave.scale.x = progress; // Scale grows from 0 to 1
+        
+        // Position the wave so it sweeps toward characters
+        tidalWave.position.x = 2 - (maxReach * progress * 0.5); // Wave extends toward characters
+        
+        // Fade in as wave advances
+        material.opacity = progress * 0.4;
+        tidalWave.scale.y = 1;
+      } else {
+        // Wave is receding - move back toward ocean
+        const recedeProgress = Math.abs(tidalCycle); // 0 to 1 (as wave goes more negative)
+        
+        if (recedeProgress > 0.1) { // Only show receding animation when clearly negative
+          // Wave visibly recedes back toward ocean
+          const recedeAmount = (recedeProgress - 0.1) / 0.9; // Normalize to 0-1
+          
+          // Scale shrinks as wave recedes
+          tidalWave.scale.x = 1 - recedeAmount;
+          
+          // Move wave back toward ocean
+          tidalWave.position.x = 0.5 + (recedeAmount * 1.5); // Moves from character area back to ocean
+          
+          // Fade out as it recedes
+          material.opacity = (1 - recedeAmount) * 0.3;
+        } else {
+          // Completely hidden between cycles
+          material.opacity = 0;
+          tidalWave.scale.x = 0;
+          tidalWave.position.x = -1; // Reset position
+        }
+      }
+      
+      // Infinite scrolling for tidal waves
+      const originalZ = tidalData.originalZ;
+      const sectionOffset = Math.floor(originalZ / sectionLength) * sectionLength;
+      const localZ = originalZ % sectionLength;
+      const newZ = sectionOffset + localZ - (totalDistance % sectionLength);
+      
+      if (newZ < -sectionLength) {
+        tidalWave.position.z = newZ + sectionLength * 3;
+        tidalData.originalZ = tidalWave.position.z;
+      } else if (newZ > sectionLength) {
+        tidalWave.position.z = newZ - sectionLength * 3;
+        tidalData.originalZ = tidalWave.position.z;
+      } else {
+        tidalWave.position.z = newZ;
+      }
+    });
 
     // Update path
     this.path.updateByFrame(totalDistance);
@@ -578,14 +838,14 @@ export class BeachEnvironment extends BaseEnvironment {
         seagullData.centerX + Math.cos(seagullData.angle) * seagullData.radius;
       seagullData.mesh.position.z =
         Math.sin(seagullData.angle) * seagullData.radius;
-      seagullData.mesh.position.y = 15 + Math.sin(this.waveTime * 2) * 3;
+      seagullData.mesh.position.y = 15 + Math.sin(frameTime * 2) * 3;
 
-      // Wing flapping animation
+      // Wing flapping animation - frame-based timing
       if (seagullData.mesh.children[1] && seagullData.mesh.children[2]) {
         seagullData.mesh.children[1].rotation.z =
-          Math.sin(this.waveTime * 10) * 0.3;
+          Math.sin(frameTime * 10) * 0.3;
         seagullData.mesh.children[2].rotation.z =
-          -Math.sin(this.waveTime * 10) * 0.3;
+          -Math.sin(frameTime * 10) * 0.3;
       }
     });
 
