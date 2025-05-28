@@ -8,6 +8,7 @@ export interface EnvironmentConfig {
   groundColor: number;
   pathColor: number;
   enableShadows: boolean;
+  characterYOffset?: number; // Y position offset for characters in this environment
 }
 
 export interface EnvironmentElements {

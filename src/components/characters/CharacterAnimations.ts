@@ -18,11 +18,13 @@ export class CharacterAnimations {
   private character: Character;
   private walkOffset: number;
   private animationSpeed: number;
+  private baseYPosition: number;
   
   constructor(character: Character, walkOffset: number = 0, animationSpeed: number = 1) {
     this.character = character;
     this.walkOffset = walkOffset;
     this.animationSpeed = animationSpeed;
+    this.baseYPosition = character.position.y; // Store the initial Y position
   }
   
   public update(
@@ -67,8 +69,8 @@ export class CharacterAnimations {
     
     if (!parts) return; // Safety check
     
-    // Body bob
-    this.character.position.y = Math.sin(walkPhase * 2) * 0.05;
+    // Body bob - add to base position instead of overriding
+    this.character.position.y = this.baseYPosition + Math.sin(walkPhase * 2) * 0.05;
     
     // Body sway
     this.character.rotation.z = Math.sin(walkPhase) * 0.02;

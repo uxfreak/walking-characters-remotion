@@ -10,6 +10,7 @@ export const BeachConfig: EnvironmentConfig = {
   groundColor: 0xf4e4c1, // Light sand color
   pathColor: 0xd4a76a, // Wet sand color
   enableShadows: true,
+  characterYOffset: 1.2, // Lift characters to prevent legs being buried in sand
 };
 
 // Beach-specific materials
@@ -30,15 +31,6 @@ export const BeachMaterials = {
     opacity: 0.85,
     roughness: 0.3,
     metalness: 0.3,
-  }),
-  foam: new THREE.MeshStandardMaterial({
-    color: 0xffffff,
-    transparent: true,
-    opacity: 0.7,
-    roughness: 1,
-    metalness: 0,
-    emissive: 0xffffff,
-    emissiveIntensity: 0.1,
   }),
   palmTrunk: new THREE.MeshStandardMaterial({
     color: 0x8b4513,
@@ -75,26 +67,26 @@ class SimplePalmTree {
     const frondCount = 8;
     for (let i = 0; i < frondCount; i++) {
       const angle = (i / frondCount) * Math.PI * 2;
-      
+
       // Create a frond group
       const frondGroup = new THREE.Group();
-      
+
       // Main stem of the frond
       const stemGeometry = new THREE.PlaneGeometry(0.2 * scale, 4 * scale);
       const stem = new THREE.Mesh(stemGeometry, BeachMaterials.palmLeaves);
       stem.position.y = 2 * scale;
       frondGroup.add(stem);
-      
+
       // Add leaves along the stem
       for (let j = 0; j < 6; j++) {
         const leafGeometry = new THREE.PlaneGeometry(0.8 * scale, 0.5 * scale);
         const leaf = new THREE.Mesh(leafGeometry, BeachMaterials.palmLeaves);
         leaf.position.y = (1 + j * 0.5) * scale;
         leaf.position.x = (j % 2 === 0 ? 0.4 : -0.4) * scale;
-        leaf.rotation.z = (j % 2 === 0 ? 0.3 : -0.3);
+        leaf.rotation.z = j % 2 === 0 ? 0.3 : -0.3;
         frondGroup.add(leaf);
       }
-      
+
       frondGroup.position.y = 6 * scale;
       frondGroup.rotation.y = angle;
       frondGroup.rotation.z = Math.PI / 4;
@@ -133,7 +125,14 @@ export class BeachEnvironment extends BaseEnvironment {
   private palmTrees: SimplePalmTree[] = [];
   private sun: THREE.Mesh;
   private waves: { mesh: THREE.Mesh; offset: number }[] = [];
-  private seagulls: { mesh: THREE.Group; speed: number; radius: number; angle: number; centerX: number }[] = [];
+  private seagulls: {
+    mesh: THREE.Group;
+    speed: number;
+    radius: number;
+    angle: number;
+    centerX: number;
+  }[] = [];
+  private mountains: { mesh: THREE.Group; originalZ: number }[] = [];
   private waveTime: number = 0;
 
   constructor(scene: THREE.Scene, seed: number = 12345) {
@@ -141,7 +140,7 @@ export class BeachEnvironment extends BaseEnvironment {
 
     // Create sunset gradient background
     this.createSunsetBackground();
-    
+
     // Set up sunset lighting
     this.setupSunsetLighting();
 
@@ -149,14 +148,19 @@ export class BeachEnvironment extends BaseEnvironment {
     const sectionLength = 200;
     for (let section = -1; section <= 1; section++) {
       // Create beach terrain with gentle slope
-      const beachGeometry = new THREE.PlaneGeometry(200, sectionLength, 100, 100);
+      const beachGeometry = new THREE.PlaneGeometry(
+        200,
+        sectionLength,
+        100,
+        100
+      );
       const beachVertices = beachGeometry.attributes.position.array;
-      
+
       // Create gentle slope to water (water is on the right side at x > 15)
       for (let i = 0; i < beachVertices.length; i += 3) {
         const x = beachVertices[i];
         const z = beachVertices[i + 1];
-        
+
         let height = 0;
         if (x < 15) {
           height = 0; // Flat beach area
@@ -164,25 +168,30 @@ export class BeachEnvironment extends BaseEnvironment {
           // Gradual slope down to water
           height = -(x - 15) * 0.05;
         }
-        
+
         // Add small sand ripples
         height += Math.sin(x * 0.5) * 0.05;
         height += Math.sin(z * 0.3) * 0.03;
-        
+
         beachVertices[i + 2] = height;
       }
-      
+
       beachGeometry.computeVertexNormals();
       const beach = new THREE.Mesh(beachGeometry, BeachMaterials.sand);
       beach.rotation.x = -Math.PI / 2;
-      beach.position.y = 0;
+      beach.position.y = 0; // Slightly below ground level
       beach.position.z = section * sectionLength;
       beach.receiveShadow = true;
       this.beachSections.push(beach);
       scene.add(beach);
 
       // Create wet sand area
-      const wetSandGeometry = new THREE.PlaneGeometry(40, sectionLength, 20, 50);
+      const wetSandGeometry = new THREE.PlaneGeometry(
+        40,
+        sectionLength,
+        20,
+        50
+      );
       const wetSand = new THREE.Mesh(wetSandGeometry, BeachMaterials.wetSand);
       wetSand.rotation.x = -Math.PI / 2;
       wetSand.position.set(15, -0.5, section * sectionLength);
@@ -197,10 +206,13 @@ export class BeachEnvironment extends BaseEnvironment {
     this.waterPlane.rotation.x = -Math.PI / 2;
     this.waterPlane.position.set(100, -1, 0);
     scene.add(this.waterPlane);
-    
+
     // Add horizon water
     const horizonWaterGeometry = new THREE.PlaneGeometry(500, 600, 20, 20);
-    this.horizonWater = new THREE.Mesh(horizonWaterGeometry, BeachMaterials.water);
+    this.horizonWater = new THREE.Mesh(
+      horizonWaterGeometry,
+      BeachMaterials.water
+    );
     this.horizonWater.rotation.x = -Math.PI / 2;
     this.horizonWater.position.set(200, -1.5, 0);
     scene.add(this.horizonWater);
@@ -219,24 +231,27 @@ export class BeachEnvironment extends BaseEnvironment {
 
     // Create palm trees
     this.createPalmTrees();
+
+    // Create mountains on the non-sea side
+    this.createMountains();
   }
 
   private createSunsetBackground(): void {
     // Create sunset gradient background texture
-    const canvas = document.createElement('canvas');
+    const canvas = document.createElement("canvas");
     canvas.width = 256;
     canvas.height = 512;
-    const context = canvas.getContext('2d');
+    const context = canvas.getContext("2d");
     if (context) {
       const gradient = context.createLinearGradient(0, 0, 0, 512);
-      gradient.addColorStop(0, '#FFB6C1'); // Light pink at top
-      gradient.addColorStop(0.3, '#FF69B4'); // Hot pink
-      gradient.addColorStop(0.5, '#FF8C00'); // Dark orange
-      gradient.addColorStop(0.7, '#FFD700'); // Gold
-      gradient.addColorStop(1, '#4682B4'); // Steel blue at horizon
+      gradient.addColorStop(0, "#FFB6C1"); // Light pink at top
+      gradient.addColorStop(0.3, "#FF69B4"); // Hot pink
+      gradient.addColorStop(0.5, "#FF8C00"); // Dark orange
+      gradient.addColorStop(0.7, "#FFD700"); // Gold
+      gradient.addColorStop(1, "#4682B4"); // Steel blue at horizon
       context.fillStyle = gradient;
       context.fillRect(0, 0, 256, 512);
-      
+
       const backgroundTexture = new THREE.CanvasTexture(canvas);
       this.scene.background = backgroundTexture;
     }
@@ -245,7 +260,7 @@ export class BeachEnvironment extends BaseEnvironment {
   private setupSunsetLighting(): void {
     // Remove existing lights and add sunset-specific lighting
     this.scene.traverse((child) => {
-      if (child instanceof THREE.Light && child.type !== 'AmbientLight') {
+      if (child instanceof THREE.Light && child.type !== "AmbientLight") {
         this.scene.remove(child);
       }
     });
@@ -275,23 +290,8 @@ export class BeachEnvironment extends BaseEnvironment {
   }
 
   private createWaves(): void {
-    const random = this.createSeededRandom(this.seed);
-    
-    // Create wave shape using boxes for simplicity
-    for (let section = -1; section <= 1; section++) {
-      for (let i = 0; i < 3; i++) {
-        const waveGeometry = new THREE.BoxGeometry(2, 0.5, 100);
-        const wave = new THREE.Mesh(waveGeometry, BeachMaterials.foam);
-        wave.position.set(
-          15 + i * 4 + random() * 2,
-          -0.3,
-          section * 200 + i * 20 + random() * 10
-        );
-        wave.scale.y = 0.5 + random() * 0.3;
-        this.waves.push({ mesh: wave, offset: random() * Math.PI * 2 });
-        this.scene.add(wave);
-      }
-    }
+    // Waves are now handled purely through water vertex animation
+    // No foam meshes are created
   }
 
   private createSun(): void {
@@ -308,7 +308,7 @@ export class BeachEnvironment extends BaseEnvironment {
 
   private createSeagulls(): void {
     const random = this.createSeededRandom(this.seed + 100);
-    
+
     // Create simple seagulls
     for (let i = 0; i < 3; i++) {
       const seagull = this.createSeagull();
@@ -322,7 +322,7 @@ export class BeachEnvironment extends BaseEnvironment {
         speed: 0.5 + random() * 0.5,
         radius: 20 + random() * 20,
         angle: random() * Math.PI * 2,
-        centerX: 100 + random() * 40
+        centerX: 100 + random() * 40,
       });
       this.scene.add(seagull);
     }
@@ -330,13 +330,13 @@ export class BeachEnvironment extends BaseEnvironment {
 
   private createSeagull(): THREE.Group {
     const seagull = new THREE.Group();
-    
+
     // Simple body
     const bodyGeometry = new THREE.SphereGeometry(0.2, 6, 4);
     const bodyMaterial = new THREE.MeshStandardMaterial({ color: 0xffffff });
     const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
     seagull.add(body);
-    
+
     // Wings
     for (let side of [-1, 1]) {
       const wingGeometry = new THREE.PlaneGeometry(1, 0.3);
@@ -345,7 +345,7 @@ export class BeachEnvironment extends BaseEnvironment {
       wing.rotation.y = side * 0.3;
       seagull.add(wing);
     }
-    
+
     return seagull;
   }
 
@@ -364,7 +364,7 @@ export class BeachEnvironment extends BaseEnvironment {
         this.palmTrees.push(palmTree);
         this.scene.add(palmTree.getMesh());
       }
-      
+
       // Some trees on the right (beach side)
       for (let i = 0; i < 2; i++) {
         const x = 5 + random() * 10;
@@ -377,14 +377,126 @@ export class BeachEnvironment extends BaseEnvironment {
     }
   }
 
+  private createMountains(): void {
+    const random = this.createSeededRandom(this.seed + 200);
+
+    // Create coastal mountain materials
+    const mountainMaterials = {
+      far: new THREE.MeshStandardMaterial({
+        color: 0x6b7aa1, // Blue-gray for distant mountains
+        roughness: 1,
+        metalness: 0,
+        transparent: true,
+        opacity: 0.6,
+      }),
+      mid: new THREE.MeshStandardMaterial({
+        color: 0x8e9aaf, // Lighter blue-gray
+        roughness: 1,
+        metalness: 0,
+        transparent: true,
+        opacity: 0.7,
+      }),
+      close: new THREE.MeshStandardMaterial({
+        color: 0xa5aab8, // Light gray-blue
+        roughness: 0.9,
+        metalness: 0,
+        transparent: true,
+        opacity: 0.8,
+      }),
+    };
+
+    // Create mountain ranges at different distances
+    const ranges = [
+      {
+        distance: -80,
+        count: 5,
+        material: mountainMaterials.far,
+        heightRange: [30, 50],
+        widthRange: [15, 25],
+      },
+      {
+        distance: -60,
+        count: 4,
+        material: mountainMaterials.mid,
+        heightRange: [25, 40],
+        widthRange: [12, 20],
+      },
+      {
+        distance: -45,
+        count: 3,
+        material: mountainMaterials.close,
+        heightRange: [20, 30],
+        widthRange: [10, 18],
+      },
+    ];
+
+    // Create mountains for each range
+    ranges.forEach((range) => {
+      for (let section = -1; section <= 1; section++) {
+        for (let i = 0; i < range.count; i++) {
+          const mountain = new THREE.Group();
+
+          // Main peak
+          const height =
+            range.heightRange[0] +
+            random() * (range.heightRange[1] - range.heightRange[0]);
+          const width =
+            range.widthRange[0] +
+            random() * (range.widthRange[1] - range.widthRange[0]);
+
+          const peakGeometry = new THREE.ConeGeometry(width, height, 8);
+          const peak = new THREE.Mesh(peakGeometry, range.material);
+          peak.position.y = height / 2;
+          mountain.add(peak);
+
+          // Add some variation with secondary peaks
+          const numSecondary = Math.floor(1 + random() * 2);
+          for (let j = 0; j < numSecondary; j++) {
+            const secondaryHeight = height * (0.5 + random() * 0.3);
+            const secondaryWidth = width * (0.4 + random() * 0.3);
+            const secondaryGeometry = new THREE.ConeGeometry(
+              secondaryWidth,
+              secondaryHeight,
+              6
+            );
+            const secondaryPeak = new THREE.Mesh(
+              secondaryGeometry,
+              range.material
+            );
+
+            const angle = random() * Math.PI * 2;
+            const offset = width * 0.5;
+            secondaryPeak.position.set(
+              Math.cos(angle) * offset,
+              secondaryHeight / 2,
+              Math.sin(angle) * offset
+            );
+            mountain.add(secondaryPeak);
+          }
+
+          // Position the mountain
+          const xPosition = range.distance + random() * 20 - 10;
+          const zPosition =
+            section * 200 + (i / range.count) * 180 + random() * 20;
+
+          mountain.position.set(xPosition, 0, zPosition);
+          mountain.rotation.y = random() * Math.PI * 2;
+
+          this.mountains.push({ mesh: mountain, originalZ: zPosition });
+          this.scene.add(mountain);
+        }
+      }
+    });
+  }
+
   updateByFrame(totalDistance: number): void {
     const sectionLength = 200;
-    
+
     // Update beach sections
     this.beachSections.forEach((section, index) => {
       const offset = (index - 1) * sectionLength;
       const newZ = offset - (totalDistance % sectionLength);
-      
+
       if (newZ < -sectionLength) {
         section.position.z = newZ + sectionLength * 3;
       } else if (newZ > sectionLength) {
@@ -398,7 +510,7 @@ export class BeachEnvironment extends BaseEnvironment {
     this.wetSandSections.forEach((section, index) => {
       const offset = (index - 1) * sectionLength;
       const newZ = offset - (totalDistance % sectionLength);
-      
+
       if (newZ < -sectionLength) {
         section.position.z = newZ + sectionLength * 3;
       } else if (newZ > sectionLength) {
@@ -408,31 +520,29 @@ export class BeachEnvironment extends BaseEnvironment {
       }
     });
 
-    // Animate waves
+    // Update wave time for water animation
     this.waveTime += 0.016;
-    this.waves.forEach((waveData) => {
-      const wave = waveData.mesh;
-      wave.position.y = -0.3 + Math.sin(this.waveTime * 2 + waveData.offset) * 0.2;
-      wave.scale.x = 2 + Math.sin(this.waveTime * 2 + waveData.offset) * 0.3;
-    });
 
     // Animate water surface
     const waterVertices = this.waterPlane.geometry.attributes.position.array;
     for (let i = 0; i < waterVertices.length; i += 3) {
       const x = waterVertices[i];
       const z = waterVertices[i + 1];
-      waterVertices[i + 2] = Math.sin(x * 0.1 + this.waveTime) * 0.3 + 
-                             Math.sin(z * 0.1 + this.waveTime * 1.5) * 0.2;
+      waterVertices[i + 2] =
+        Math.sin(x * 0.1 + this.waveTime) * 0.3 +
+        Math.sin(z * 0.1 + this.waveTime * 1.5) * 0.2;
     }
     this.waterPlane.geometry.attributes.position.needsUpdate = true;
 
     // Animate horizon water
-    const horizonVertices = this.horizonWater.geometry.attributes.position.array;
+    const horizonVertices =
+      this.horizonWater.geometry.attributes.position.array;
     for (let i = 0; i < horizonVertices.length; i += 3) {
       const x = horizonVertices[i];
       const z = horizonVertices[i + 1];
-      horizonVertices[i + 2] = Math.sin(x * 0.05 + this.waveTime * 0.8) * 0.2 + 
-                               Math.sin(z * 0.05 + this.waveTime * 1.2) * 0.15;
+      horizonVertices[i + 2] =
+        Math.sin(x * 0.05 + this.waveTime * 0.8) * 0.2 +
+        Math.sin(z * 0.05 + this.waveTime * 1.2) * 0.15;
     }
     this.horizonWater.geometry.attributes.position.needsUpdate = true;
 
@@ -441,12 +551,14 @@ export class BeachEnvironment extends BaseEnvironment {
 
     // Update palm trees position for infinite scrolling
     this.palmTrees.forEach((tree) => {
-      const originalZ = tree.getMesh().userData.originalZ || tree.getMesh().position.z;
+      const originalZ =
+        tree.getMesh().userData.originalZ || tree.getMesh().position.z;
       if (!tree.getMesh().userData.originalZ) {
         tree.getMesh().userData.originalZ = originalZ;
       }
 
-      const sectionOffset = Math.floor(originalZ / sectionLength) * sectionLength;
+      const sectionOffset =
+        Math.floor(originalZ / sectionLength) * sectionLength;
       const localZ = originalZ % sectionLength;
       const newZ = sectionOffset + localZ - (totalDistance % sectionLength);
 
@@ -460,16 +572,40 @@ export class BeachEnvironment extends BaseEnvironment {
     });
 
     // Animate seagulls
-    this.seagulls.forEach(seagullData => {
+    this.seagulls.forEach((seagullData) => {
       seagullData.angle += 0.01 * seagullData.speed;
-      seagullData.mesh.position.x = seagullData.centerX + Math.cos(seagullData.angle) * seagullData.radius;
-      seagullData.mesh.position.z = Math.sin(seagullData.angle) * seagullData.radius;
+      seagullData.mesh.position.x =
+        seagullData.centerX + Math.cos(seagullData.angle) * seagullData.radius;
+      seagullData.mesh.position.z =
+        Math.sin(seagullData.angle) * seagullData.radius;
       seagullData.mesh.position.y = 15 + Math.sin(this.waveTime * 2) * 3;
-      
+
       // Wing flapping animation
       if (seagullData.mesh.children[1] && seagullData.mesh.children[2]) {
-        seagullData.mesh.children[1].rotation.z = Math.sin(this.waveTime * 10) * 0.3;
-        seagullData.mesh.children[2].rotation.z = -Math.sin(this.waveTime * 10) * 0.3;
+        seagullData.mesh.children[1].rotation.z =
+          Math.sin(this.waveTime * 10) * 0.3;
+        seagullData.mesh.children[2].rotation.z =
+          -Math.sin(this.waveTime * 10) * 0.3;
+      }
+    });
+
+    // Update mountains for infinite scrolling with parallax
+    this.mountains.forEach((mountainData) => {
+      const mountain = mountainData.mesh;
+      const originalZ = mountainData.originalZ;
+
+      // Apply parallax effect - mountains move slower than foreground
+      const parallaxSpeed = 0.3; // Mountains move at 30% of walking speed
+      const effectiveDistance = totalDistance * parallaxSpeed;
+
+      const newZ = originalZ - (effectiveDistance % sectionLength);
+
+      if (newZ < -sectionLength) {
+        mountain.position.z = newZ + sectionLength * 3;
+      } else if (newZ > sectionLength) {
+        mountain.position.z = newZ - sectionLength * 3;
+      } else {
+        mountain.position.z = newZ;
       }
     });
   }

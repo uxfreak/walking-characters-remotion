@@ -157,14 +157,20 @@ export default function WalkingCharactersScene({
     environmentRef.current = env;
     
     // Create characters with styles
+    // Get character Y position from environment config
+    const envConfig = env.getConfig();
+    const characterYPosition = envConfig.characterYOffset !== undefined ? envConfig.characterYOffset : 0;
+    
+    console.log('Environment:', environment, 'EnvConfig characterYOffset:', envConfig.characterYOffset, 'Final Y Position:', characterYPosition);
+    
     const character1 = new Character(character1Style);
-    character1.position.set(-0.8, 0, 0);
+    character1.position.set(-0.8, characterYPosition, 0);
     const character1Animations = new CharacterAnimations(character1, 0);
     character1Ref.current = { character: character1, animations: character1Animations };
     sceneSetup.scene.add(character1);
     
     const character2 = new Character(character2Style);
-    character2.position.set(0.8, 0, 0);
+    character2.position.set(0.8, characterYPosition, 0);
     const character2Animations = new CharacterAnimations(character2, Math.PI);
     character2Ref.current = { character: character2, animations: character2Animations };
     sceneSetup.scene.add(character2);
