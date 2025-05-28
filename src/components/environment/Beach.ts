@@ -7,8 +7,8 @@ export const BeachConfig: EnvironmentConfig = {
   fogColor: 0xffb6c1, // Pink fog to match sunset
   fogNear: 50,
   fogFar: 200,
-  groundColor: 0xf4e4c1, // Light sand color
-  pathColor: 0xd4a76a, // Wet sand color
+  groundColor: 0xe0c097, // Darker sand color for better character contrast
+  pathColor: 0xc4956a, // Darker wet sand color
   enableShadows: true,
   characterYOffset: 1.2, // Lift characters to prevent legs being buried in sand
 };
@@ -16,12 +16,12 @@ export const BeachConfig: EnvironmentConfig = {
 // Beach-specific materials
 export const BeachMaterials = {
   sand: new THREE.MeshStandardMaterial({
-    color: 0xf4e4c1,
+    color: 0xe0c097, // Darker sand to match config
     roughness: 0.9,
     metalness: 0.1,
   }),
   wetSand: new THREE.MeshStandardMaterial({
-    color: 0xd4a76a,
+    color: 0xc4956a, // Darker wet sand to match config
     roughness: 0.7,
     metalness: 0.2,
   }),
@@ -210,6 +210,13 @@ export class BeachEnvironment extends BaseEnvironment {
   private mountains: { mesh: THREE.Group; originalZ: number }[] = [];
   private waveTime: number = 0;
   private tidalWaves: { mesh: THREE.Mesh; offset: number; originalZ: number }[] = [];
+  private footsteps: { 
+    mesh: THREE.Mesh; 
+    originalZ: number; 
+    character: 'left' | 'right';
+    age: number;
+  }[] = [];
+  private lastFootstepDistance: number = 0;
 
   constructor(scene: THREE.Scene, seed: number = 12345) {
     super(scene, BeachConfig, seed);
@@ -316,6 +323,9 @@ export class BeachEnvironment extends BaseEnvironment {
 
     // Create mountains on the non-sea side
     this.createMountains();
+
+    // Create initial footstep trail as if characters have been walking
+    this.createInitialFootsteps();
   }
 
   private createSunsetBackground(): void {
@@ -676,6 +686,89 @@ export class BeachEnvironment extends BaseEnvironment {
     });
   }
 
+  private createFootprint(x: number, z: number, character: 'left' | 'right'): THREE.Mesh {
+    // Create footprint shape using a simple oval made from Shape and ExtrudeGeometry
+    const footprintShape = new THREE.Shape();
+    
+    // Create foot-like oval shape manually
+    const width = 0.12;
+    const height = 0.08;
+    
+    // Draw ellipse manually using curves
+    footprintShape.absellipse(0, 0, width, height, 0, Math.PI * 2, false, 0);
+    
+    // Create a slight depression effect by extruding slightly downward
+    const extrudeSettings = {
+      depth: 0.03,
+      bevelEnabled: false
+    };
+    
+    const footprintGeo = new THREE.ExtrudeGeometry(footprintShape, extrudeSettings);
+    
+    // Use darker wet sand material for fresh footprints
+    const footprintMaterial = new THREE.MeshStandardMaterial({
+      color: 0xa8855a, // Even darker wet sand for footprints
+      roughness: 0.9,
+      metalness: 0.1,
+    });
+    
+    const footprint = new THREE.Mesh(footprintGeo, footprintMaterial);
+    
+    // Position the footprint - account for character Y offset
+    const characterYOffset = BeachConfig.characterYOffset || 0;
+    footprint.position.set(x, characterYOffset - 0.05, z); // Slightly depressed from character level
+    footprint.rotation.x = -Math.PI / 2; // Lay flat
+    
+    // Add slight rotation for character's foot angle
+    if (character === 'left') {
+      footprint.rotation.z = Math.PI + 0.1; // Left foot angle
+      footprint.position.x -= 0.15; // Offset left
+    } else {
+      footprint.rotation.z = 0.1; // Right foot angle  
+      footprint.position.x += 0.15; // Offset right
+    }
+    
+    footprint.receiveShadow = true;
+    
+    return footprint;
+  }
+
+  private createInitialFootsteps(): void {
+    // Create a trail of footsteps extending backwards from start position
+    // as if characters have been walking for a while
+    const stepLength = 1.8;
+    const initialStepCount = 30; // Create 30 steps backwards (about 54 units behind)
+    
+    for (let i = 1; i <= initialStepCount; i++) {
+      const stepDistance = i * stepLength;
+      const character = i % 2 === 0 ? 'left' : 'right'; // Alternate feet
+      
+      // Position footsteps behind the starting position (negative Z)
+      const footprintZ = -stepDistance;
+      const footprint = this.createFootprint(0, footprintZ, character);
+      
+      // Age the footsteps based on how far back they are
+      const age = i * 10; // Older footsteps are further back
+      
+      this.footsteps.push({
+        mesh: footprint,
+        originalZ: footprintZ,
+        character: character,
+        age: age
+      });
+      
+      // Apply aging effects to older footsteps
+      const material = footprint.material as THREE.MeshStandardMaterial;
+      if (age > 300) {
+        const fadeProgress = Math.min(1, (age - 300) / 60);
+        material.opacity = 1 - fadeProgress;
+        material.transparent = true;
+      }
+      
+      this.scene.add(footprint);
+    }
+  }
+
   updateByFrame(totalDistance: number): void {
     const sectionLength = 200;
 
@@ -844,6 +937,71 @@ export class BeachEnvironment extends BaseEnvironment {
 
     // Update path
     this.path.updateByFrame(totalDistance);
+
+    // Create footsteps as characters walk
+    const stepLength = 1.8; // Distance between footsteps
+    const currentStepCount = Math.floor(totalDistance / stepLength);
+    const lastStepCount = Math.floor(this.lastFootstepDistance / stepLength);
+    
+    // Create new footsteps if we've moved far enough
+    if (currentStepCount > lastStepCount) {
+      for (let step = lastStepCount + 1; step <= currentStepCount; step++) {
+        const stepDistance = step * stepLength;
+        const character = step % 2 === 0 ? 'left' : 'right'; // Alternate feet
+        
+        // Position footsteps at character walking position (X=0, slightly behind current position)
+        const footprintZ = -stepDistance + totalDistance; // Behind current position
+        const footprint = this.createFootprint(0, footprintZ, character);
+        
+        this.footsteps.push({
+          mesh: footprint,
+          originalZ: footprintZ,
+          character: character,
+          age: 0
+        });
+        
+        this.scene.add(footprint);
+      }
+    }
+    
+    this.lastFootstepDistance = totalDistance;
+    
+    // Update footsteps position for infinite scrolling and fade old ones
+    this.footsteps.forEach((footstepData, index) => {
+      const footstep = footstepData.mesh;
+      const material = footstep.material as THREE.MeshStandardMaterial;
+      
+      // Age the footstep
+      footstepData.age += 1;
+      
+      // Fade out old footsteps (after 300 frames / 10 seconds at 30fps)
+      if (footstepData.age > 300) {
+        const fadeProgress = Math.min(1, (footstepData.age - 300) / 60); // Fade over 2 seconds
+        material.opacity = 1 - fadeProgress;
+        material.transparent = true;
+        
+        // Remove completely faded footsteps
+        if (fadeProgress >= 1) {
+          this.scene.remove(footstep);
+          this.footsteps.splice(index, 1);
+          return;
+        }
+      }
+      
+      // Infinite scrolling for footsteps
+      const originalZ = footstepData.originalZ;
+      const newZ = originalZ - (totalDistance % sectionLength);
+      
+      if (newZ < -sectionLength) {
+        footstep.position.z = newZ + sectionLength * 3;
+        footstepData.originalZ = footstep.position.z;
+      } else if (newZ > sectionLength) {
+        footstep.position.z = newZ - sectionLength * 3;
+        footstepData.originalZ = footstep.position.z;
+      } else {
+        footstep.position.z = newZ;
+      }
+    });
 
     // Update palm trees position for infinite scrolling
     this.palmTrees.forEach((tree) => {
