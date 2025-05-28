@@ -5,7 +5,7 @@ import { OrbitControls } from './components/controls/OrbitControls';
 import { Character } from './components/characters/Character';
 import { CharacterAnimations, Speaker } from './components/characters/CharacterAnimations';
 import { JungleEnvironment } from './components/environment/Jungle';
-import { CameraShot } from './constants/cameraShots';
+import { CameraShot, adjustShotForCharacterOffset } from './constants/cameraShots';
 import { CharacterStyle } from './data/sceneConfig';
 import { EnvironmentFactory, EnvironmentType, IEnvironment } from './components/environment/EnvironmentFactory';
 
@@ -54,12 +54,19 @@ export default function WalkingCharactersScene({
     }
     
     // Update camera based on shot or controls
-    if (cameraShot && sceneSetupRef.current) {
-      // Apply camera shot settings
-      sceneSetupRef.current.camera.position.copy(cameraShot.position);
-      sceneSetupRef.current.camera.lookAt(cameraShot.target);
-      if (cameraShot.fov) {
-        sceneSetupRef.current.camera.fov = cameraShot.fov;
+    if (cameraShot && sceneSetupRef.current && environmentRef.current) {
+      // Get character offset from environment
+      const envConfig = environmentRef.current.getConfig();
+      const characterYOffset = envConfig.characterYOffset !== undefined ? envConfig.characterYOffset : 0;
+      
+      // Adjust camera shot for character offset
+      const adjustedShot = adjustShotForCharacterOffset(cameraShot, characterYOffset);
+      
+      // Apply adjusted camera shot settings
+      sceneSetupRef.current.camera.position.copy(adjustedShot.position);
+      sceneSetupRef.current.camera.lookAt(adjustedShot.target);
+      if (adjustedShot.fov) {
+        sceneSetupRef.current.camera.fov = adjustedShot.fov;
         sceneSetupRef.current.camera.updateProjectionMatrix();
       }
     } else if (!cameraShot && !enableControls && sceneSetupRef.current) {

@@ -178,3 +178,29 @@ export const getShotFromSequence = (
   // Return last shot if frame exceeds sequence
   return CameraShots[sequence[sequence.length - 1].shot];
 };
+
+// Adjust camera shot positions based on character Y offset
+export const adjustShotForCharacterOffset = (
+  shot: CameraShot,
+  characterYOffset: number
+): CameraShot => {
+  // Only adjust if there's an offset
+  if (characterYOffset === 0) return shot;
+  
+  // Create a new shot with adjusted positions
+  const adjustedShot: CameraShot = {
+    ...shot,
+    position: new THREE.Vector3(
+      shot.position.x,
+      shot.position.y + characterYOffset, // Lift camera by character offset
+      shot.position.z
+    ),
+    target: new THREE.Vector3(
+      shot.target.x,
+      shot.target.y + characterYOffset, // Lift target by character offset
+      shot.target.z
+    )
+  };
+  
+  return adjustedShot;
+};
