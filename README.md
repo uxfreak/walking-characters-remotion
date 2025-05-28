@@ -9,7 +9,7 @@ A sophisticated 3D walking characters animation system built with Remotion, Thre
 - 💬 **Dialogue System**: Add conversations with timed subtitles
 - 🗣️ **AI Voiceover**: OpenAI TTS integration with expressive voice personalities
 - 🎨 **Gender Variations**: Male and female characters with distinct body proportions
-- 🌳 **Jungle Environment**: Trees, mountains, path, and undergrowth
+- 🌳 **Multiple Environments**: Jungle, Beach, Snowy Forest, Cherry Blossom, Desert
 - 📝 **JSON Configuration**: Create videos without coding - just write JSON files
 - 🎬 **Multiple Formats**: Standard and cinematic (letterbox) versions
 - ⏱️ **Auto-timing**: Automatically calculates video duration from audio files
@@ -38,16 +38,23 @@ echo "OPENAI_API_KEY=your-api-key-here" > .env
 ### Create Your First Video
 
 ```bash
-# Option 1: Use pre-built examples
-node scripts/render.js JungleWalk deep    # Deep philosophical conversation
-node scripts/render.js JungleWalk simple  # Simple casual conversation
+# Render Command Pattern:
+node scripts/render.js {composition} {config-file-path} --gl=angle
 
-# Option 2: Use the container philosophy example
-node scripts/render.js JungleWalk configs/container-philosophy.json
+# Examples with pre-built configs:
+node scripts/render.js CinematicJungleWalk configs/container-philosophy.json --gl=angle
+node scripts/render.js CinematicJungleWalk configs/beach-sunset.json --gl=angle
+node scripts/render.js CinematicJungleWalk configs/tech-founders.json --gl=angle
 
-# Option 3: Create your own JSON config (see below)
-node scripts/render.js JungleWalk configs/my-video.json
+# With your own JSON config:
+node scripts/render.js CinematicJungleWalk configs/my-video.json --gl=angle
+
+# Using built-in presets:
+node scripts/render.js CinematicJungleWalk deep --gl=angle    # Deep philosophical conversation
+node scripts/render.js CinematicJungleWalk simple --gl=angle  # Simple casual conversation
 ```
+
+**Important:** The command pattern is `{composition} {config-path}` without any flags before the config path. Always include `--gl=angle` for proper rendering.
 
 ## 📝 Creating Videos with JSON (No Coding Required!)
 
@@ -120,6 +127,10 @@ Create a new file in the `configs/` directory (e.g., `configs/my-story.json`):
     "generateVoiceover": true,
     "model": "gpt-4o-mini-tts",
     "globalSpeed": 1.0
+  },
+  
+  "sceneConfig": {
+    "environment": "jungle"  // Options: jungle, beach, snowyForest, cherryBlossom, desert
   }
 }
 ```
@@ -127,14 +138,14 @@ Create a new file in the `configs/` directory (e.g., `configs/my-story.json`):
 ### Step 2: Render Your Video
 
 ```bash
-node scripts/render.js JungleWalk configs/my-story.json
+node scripts/render.js CinematicJungleWalk configs/my-story.json --gl=angle
 ```
 
 The script will:
 1. Generate AI voiceovers for each dialogue line
 2. Calculate timing based on audio duration
 3. Render the video with synchronized audio and subtitles
-4. Save to `out/MyAmazingStory_JungleWalk_[timestamp].mp4`
+4. Save to `out/MyAmazingStory_CinematicJungleWalk_[timestamp].mp4`
 
 ## 🎙️ Voiceover Configuration
 
@@ -249,6 +260,30 @@ Specify exact frame timings (30 fps):
 - **Male**: Broader shoulders, thicker arms, shorter hair
 - **Female**: Narrower shoulders, longer hair, eyelashes
 
+### Environment Options
+
+Choose from 5 beautifully crafted environments:
+
+```json
+"sceneConfig": {
+  "environment": "beach"  // Choose your environment
+}
+```
+
+**Available Environments:**
+
+1. **jungle** (default) - Lush green forest with dense trees and undergrowth
+2. **beach** - Sandy beach with ocean waves and palm trees
+3. **snowyForest** - Winter wonderland with falling snow and frosted trees
+4. **cherryBlossom** - Japanese-inspired scene with pink petals falling
+5. **desert** - Arid landscape with cacti and rock formations
+
+Each environment includes:
+- Themed color palette and lighting
+- Unique flora and features
+- Atmospheric effects (snow, petals, etc.)
+- Consistent walking path
+
 ## 🎬 Example Configurations
 
 ### Philosophy Discussion
@@ -349,29 +384,27 @@ Specify exact frame timings (30 fps):
 ### Basic Rendering
 
 ```bash
-# Render with JSON config
-node scripts/render.js JungleWalk configs/my-video.json
+# Command Pattern:
+node scripts/render.js CinematicJungleWalk {config-path} --gl=angle
 
-# Render with built-in configs
-node scripts/render.js JungleWalk deep
-node scripts/render.js JungleWalk simple
+# Render with JSON configs:
+node scripts/render.js CinematicJungleWalk configs/my-video.json --gl=angle
+node scripts/render.js CinematicJungleWalk configs/beach-sunset.json --gl=angle
+node scripts/render.js CinematicJungleWalk configs/snow-test.json --gl=angle
+node scripts/render.js CinematicJungleWalk configs/cherry-test.json --gl=angle
+node scripts/render.js CinematicJungleWalk configs/desert-test.json --gl=angle
 
-# Cinematic mode (letterbox)
-node scripts/render.js CinematicJungleWalk configs/my-video.json
+# Render with built-in presets:
+node scripts/render.js CinematicJungleWalk deep --gl=angle
+node scripts/render.js CinematicJungleWalk simple --gl=angle
 ```
 
 ### Advanced Options
 
 ```bash
-# Skip voiceover generation (use existing audio)
-node scripts/render.js JungleWalk configs/my-video.json --skip-audio
-
-# Custom output location
-node scripts/render.js JungleWalk configs/my-video.json --output=my-folder/
-
-# WebGL rendering options (if you have issues)
-node scripts/render.js JungleWalk configs/my-video.json --gl=angle
-node scripts/render.js JungleWalk configs/my-video.json --gl=swiftshader
+# WebGL rendering options (ALWAYS USE ONE OF THESE)
+node scripts/render.js CinematicJungleWalk configs/my-video.json --gl=angle      # Recommended
+node scripts/render.js CinematicJungleWalk configs/my-video.json --gl=swiftshader # If angle fails
 ```
 
 ## 📁 Project Structure
@@ -379,7 +412,11 @@ node scripts/render.js JungleWalk configs/my-video.json --gl=swiftshader
 ```
 walking-characters-remotion/
 ├── configs/                    # Your JSON video configurations
-│   └── container-philosophy.json
+│   ├── container-philosophy.json
+│   ├── beach-sunset.json      # Beach environment example
+│   ├── snow-test.json         # Snowy forest example
+│   ├── cherry-test.json       # Cherry blossom example
+│   └── desert-test.json       # Desert environment example
 ├── src/
 │   ├── compositions/          # Video renderers
 │   ├── components/           # 3D models and animations
@@ -411,13 +448,13 @@ cat .env
 - Check that all dialogue has proper speaker assignments
 - Avoid very long sentences (break into multiple lines)
 
-**3. WebGL/Rendering Issues**
+**3. WebGL/Rendering Issues or Empty Screen**
 ```bash
-# Try software rendering
-node scripts/render.js JungleWalk configs/my-video.json --gl=swiftshader
+# CORRECT command pattern (config path without flags):
+node scripts/render.js CinematicJungleWalk configs/my-video.json --gl=angle
 
-# Or use ANGLE
-node scripts/render.js JungleWalk configs/my-video.json --gl=angle
+# If you see WebGL errors in console, they are normal during rendering
+# The video file will still be created successfully
 ```
 
 **4. Character Not Showing Correct Gender**

@@ -1,0 +1,16 @@
+[
+  {
+    "filepath": "/Users/ssuman/Downloads/Projects/figmaFileToLLMContext/walking-characters-remotion/public/audio/2025-05-27_21-51-11/dialogue_2_character1_sam.mp3",
+    "duration": 2.568,
+    "text": "Feel that ocean breeze!",
+    "speaker": "Sam",
+    "voice": "echo"
+  },
+  {
+    "filepath": "/Users/ssuman/Downloads/Projects/figmaFileToLLMContext/walking-characters-remotion/public/audio/2025-05-27_21-51-11/dialogue_3_character2_aria.mp3",
+    "duration": 2.616,
+    "text": "The sand feels warm between my toes.",
+    "speaker": "Aria",
+    "voice": "nova"
+  }
+]

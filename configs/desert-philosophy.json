@@ -1,0 +1,93 @@
+{
+  "name": "Desert Philosophy",
+  "description": "A deep conversation about mirages and reality in the desert",
+  "environment": "desert",
+  "cameraSequence": [
+    { "shotName": "environment", "start": 0, "end": 150 },
+    { "shotName": "wide", "start": 150, "end": 300 },
+    { "shotName": "character1Focus", "start": 300, "end": 450 },
+    { "shotName": "character2Focus", "start": 450, "end": 600 },
+    { "shotName": "closeUp", "start": 600, "end": 750 },
+    { "shotName": "sideProfile", "start": 750, "end": 900 },
+    { "shotName": "overShoulder2", "start": 900, "end": 1050 },
+    { "shotName": "overShoulder1", "start": 1050, "end": 1200 }
+  ],
+  "conversation": [
+    { "start": 0, "end": 150, "speaker": "NONE", "text": "" },
+    {
+      "start": 150,
+      "end": 300,
+      "speaker": "CHARACTER_1",
+      "text": "In the desert, you see things that aren't really there - mirages."
+    },
+    {
+      "start": 300,
+      "end": 450,
+      "speaker": "CHARACTER_2",
+      "text": "Is that so different from our everyday perception of reality?"
+    },
+    {
+      "start": 450,
+      "end": 600,
+      "speaker": "CHARACTER_1",
+      "text": "Perhaps all of life is a mirage - we see what we want to see."
+    },
+    {
+      "start": 600,
+      "end": 750,
+      "speaker": "CHARACTER_2",
+      "text": "Or maybe the desert strips away illusions, showing us truth in its bareness."
+    },
+    {
+      "start": 750,
+      "end": 900,
+      "speaker": "CHARACTER_1",
+      "text": "Like walking between these cacti - each step reveals something real and sharp."
+    },
+    {
+      "start": 900,
+      "end": 1050,
+      "speaker": "CHARACTER_2",
+      "text": "The heat, the sand, the endless horizon - they force us to confront ourselves."
+    },
+    {
+      "start": 1050,
+      "end": 1200,
+      "speaker": "BOTH",
+      "text": "In emptiness, we find fullness..."
+    }
+  ],
+  "characters": {
+    "character1": {
+      "name": "Zane",
+      "gender": "male",
+      "primaryColor": "#D2691E",
+      "secondaryColor": "#8B4513",
+      "hairColor": "#000000",
+      "skinTone": "#D2B48C",
+      "audioConfig": {
+        "voice": "echo",
+        "voiceInstructions": "Contemplative desert wanderer. Speak with the wisdom of someone who has spent years in solitude. Dry humor, long pauses as if conserving words like water.",
+        "speed": 0.9
+      }
+    },
+    "character2": {
+      "name": "Luna",
+      "gender": "female",
+      "primaryColor": "#FF6347",
+      "secondaryColor": "#CD5C5C",
+      "hairColor": "#2F4F4F",
+      "skinTone": "#F5DEB3",
+      "audioConfig": {
+        "voice": "nova",
+        "voiceInstructions": "Mystical and profound. Voice carries the mystery of desert nights. Speak as if each word is a revelation discovered in the vast emptiness.",
+        "speed": 0.95
+      }
+    }
+  },
+  "audioSettings": {
+    "generateVoiceover": true,
+    "model": "gpt-4o-mini-tts",
+    "globalSpeed": 1.0
+  }
+}

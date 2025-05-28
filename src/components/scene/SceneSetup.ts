@@ -39,18 +39,13 @@ export class SceneSetup {
     );
     this.camera.position.set(-3, 4, 8);
     
-    // Create renderer with fallback for headless rendering
-    try {
-      this.renderer = new THREE.WebGLRenderer({ 
-        antialias: true,
-        preserveDrawingBuffer: true, // Important for Remotion
-        powerPreference: 'high-performance'
-      });
-    } catch (error) {
-      console.warn('WebGL not available, falling back to Canvas renderer');
-      // For headless environments, we need to handle this differently
-      throw new Error('WebGL context creation failed. Make sure to use --gl=angle or --gl=swiftshader when rendering.');
-    }
+    // Create renderer - let Three.js handle WebGL context creation
+    this.renderer = new THREE.WebGLRenderer({ 
+      antialias: true,
+      preserveDrawingBuffer: true, // Important for Remotion
+      powerPreference: 'high-performance',
+      failIfMajorPerformanceCaveat: false // Allow software rendering
+    });
     
     this.renderer.setPixelRatio(1); // Fixed pixel ratio for Remotion
     this.renderer.shadowMap.enabled = config.enableShadows ?? true;

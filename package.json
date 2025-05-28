@@ -5,12 +5,12 @@
   "main": "index.js",
   "scripts": {
     "start": "remotion studio",
-    "build": "node scripts/render.js JungleWalk standard --gl=angle",
-    "build:cinematic": "node scripts/render.js CinematicJungleWalk cinematic --gl=angle",
-    "build:swiftshader": "node scripts/render.js JungleWalk standard --gl=swiftshader",
-    "build:cinematic:swiftshader": "node scripts/render.js CinematicJungleWalk cinematic --gl=swiftshader",
+    "build": "node scripts/render.js CinematicJungleWalk deep --gl=angle",
+    "build:simple": "node scripts/render.js CinematicJungleWalk simple --gl=angle",
+    "build:swiftshader": "node scripts/render.js CinematicJungleWalk deep --gl=swiftshader",
+    "build:simple:swiftshader": "node scripts/render.js CinematicJungleWalk simple --gl=swiftshader",
     "preview": "remotion preview",
-    "render:help": "echo 'Available commands: npm run build, npm run build:cinematic, npm run build:swiftshader, npm run build:cinematic:swiftshader'"
+    "render:help": "echo 'Usage: node scripts/render.js CinematicJungleWalk {config-file-path} --gl=angle'"
   },
   "keywords": [],
   "author": "",

@@ -1,0 +1,16 @@
+[
+  {
+    "filepath": "/Users/ssuman/Downloads/Projects/figmaFileToLLMContext/walking-characters-remotion/public/audio/2025-05-27_22-39-13/dialogue_2_character1_jake.mp3",
+    "duration": 2.112,
+    "text": "The heat is intense today!",
+    "speaker": "Jake",
+    "voice": "echo"
+  },
+  {
+    "filepath": "/Users/ssuman/Downloads/Projects/figmaFileToLLMContext/walking-characters-remotion/public/audio/2025-05-27_22-39-13/dialogue_3_character2_rosa.mp3",
+    "duration": 2.112,
+    "text": "Look at those beautiful cacti.",
+    "speaker": "Rosa",
+    "voice": "nova"
+  }
+]

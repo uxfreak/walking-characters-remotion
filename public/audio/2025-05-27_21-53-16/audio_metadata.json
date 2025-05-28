@@ -1,0 +1,16 @@
+[
+  {
+    "filepath": "/Users/ssuman/Downloads/Projects/figmaFileToLLMContext/walking-characters-remotion/public/audio/2025-05-27_21-53-16/dialogue_2_character1_hiro.mp3",
+    "duration": 2.664,
+    "text": "The petals are falling like snow!",
+    "speaker": "Hiro",
+    "voice": "echo"
+  },
+  {
+    "filepath": "/Users/ssuman/Downloads/Projects/figmaFileToLLMContext/walking-characters-remotion/public/audio/2025-05-27_21-53-16/dialogue_3_character2_sakura.mp3",
+    "duration": 2.52,
+    "text": "Spring is truly magical here.",
+    "speaker": "Sakura",
+    "voice": "nova"
+  }
+]

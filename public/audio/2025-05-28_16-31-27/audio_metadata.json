@@ -1,0 +1,16 @@
+[
+  {
+    "filepath": "/Users/ssuman/Downloads/Projects/figmaFileToLLMContext/walking-characters-remotion/public/audio/2025-05-28_16-31-27/dialogue_2_character1_alex.mp3",
+    "duration": 1.968,
+    "text": "Look at this beautiful sunset!",
+    "speaker": "Alex",
+    "voice": "echo"
+  },
+  {
+    "filepath": "/Users/ssuman/Downloads/Projects/figmaFileToLLMContext/walking-characters-remotion/public/audio/2025-05-28_16-31-27/dialogue_3_character2_maya.mp3",
+    "duration": 1.704,
+    "text": "The beach looks amazing!",
+    "speaker": "Maya",
+    "voice": "shimmer"
+  }
+]

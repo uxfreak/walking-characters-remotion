@@ -1,0 +1,63 @@
+{
+  "name": "Snow Test",
+  "description": "Quick test of snowy forest environment",
+  "environment": "snowyForest",
+  "cameraSequence": [
+    { "shotName": "wide", "start": 0, "end": 90 },
+    { "shotName": "character1Focus", "start": 90, "end": 180 },
+    { "shotName": "character2Focus", "start": 180, "end": 270 }
+  ],
+  "conversation": [
+    {
+      "start": 0,
+      "end": 90,
+      "speaker": "CHARACTER_1",
+      "text": "It's so peaceful when snow falls."
+    },
+    {
+      "start": 90,
+      "end": 180,
+      "speaker": "CHARACTER_2",
+      "text": "Like the whole world is wrapped in a blanket."
+    },
+    {
+      "start": 180,
+      "end": 270,
+      "speaker": "CHARACTER_1",
+      "text": "Our footprints are the only sound."
+    }
+  ],
+  "characters": {
+    "character1": {
+      "name": "Nick",
+      "gender": "male",
+      "primaryColor": "#8B0000",
+      "secondaryColor": "#2F4F4F",
+      "hairColor": "#4B0082",
+      "skinTone": "#FFF8DC",
+      "audioConfig": {
+        "voice": "onyx",
+        "voiceInstructions": "Quiet, contemplative voice. Speaking softly as if not to disturb the snow.",
+        "speed": 0.9
+      }
+    },
+    "character2": {
+      "name": "Winter",
+      "gender": "female",
+      "primaryColor": "#4169E1",
+      "secondaryColor": "#191970",
+      "hairColor": "#F0F8FF",
+      "skinTone": "#FFE4E1",
+      "audioConfig": {
+        "voice": "shimmer",
+        "voiceInstructions": "Gentle, whispery voice filled with wonder at the winter scene.",
+        "speed": 0.95
+      }
+    }
+  },
+  "audioSettings": {
+    "generateVoiceover": true,
+    "model": "gpt-4o-mini-tts",
+    "globalSpeed": 1.0
+  }
+}

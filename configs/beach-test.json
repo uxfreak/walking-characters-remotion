@@ -1,0 +1,58 @@
+{
+  "name": "Beach Test",
+  "description": "Quick test of beach environment",
+  "environment": "beach",
+  "cameraSequence": [
+    { "shotName": "environment", "start": 0, "end": 90 },
+    { "shotName": "wide", "start": 90, "end": 180 },
+    { "shotName": "closeUp", "start": 180, "end": 270 }
+  ],
+  "conversation": [
+    { "start": 0, "end": 90, "speaker": "NONE", "text": "" },
+    {
+      "start": 90,
+      "end": 180,
+      "speaker": "CHARACTER_1",
+      "text": "Feel that ocean breeze!"
+    },
+    {
+      "start": 180,
+      "end": 270,
+      "speaker": "CHARACTER_2",
+      "text": "The sand feels warm between my toes."
+    }
+  ],
+  "characters": {
+    "character1": {
+      "name": "Sam",
+      "gender": "male",
+      "primaryColor": "#1E90FF",
+      "secondaryColor": "#000080",
+      "hairColor": "#8B4513",
+      "skinTone": "#F5DEB3",
+      "audioConfig": {
+        "voice": "echo",
+        "voiceInstructions": "Relaxed beach vibe, speaking with joy and contentment.",
+        "speed": 1.0
+      }
+    },
+    "character2": {
+      "name": "Aria",
+      "gender": "female",
+      "primaryColor": "#FF69B4",
+      "secondaryColor": "#FF1493",
+      "hairColor": "#FFD700",
+      "skinTone": "#FFDAB9",
+      "audioConfig": {
+        "voice": "nova",
+        "voiceInstructions": "Happy and carefree, enjoying the beach day.",
+        "speed": 1.0
+      }
+    }
+  },
+  "audioSettings": {
+    "generateVoiceover": true,
+    "model": "gpt-4o-mini-tts",
+    "globalSpeed": 1.0
+  }
+}

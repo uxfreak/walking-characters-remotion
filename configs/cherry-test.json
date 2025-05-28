@@ -1,0 +1,58 @@
+{
+  "name": "Cherry Test",
+  "description": "Quick test of cherry blossom environment",
+  "environment": "cherryBlossom",
+  "cameraSequence": [
+    { "shotName": "environment", "start": 0, "end": 90 },
+    { "shotName": "wide", "start": 90, "end": 180 },
+    { "shotName": "closeUp", "start": 180, "end": 270 }
+  ],
+  "conversation": [
+    { "start": 0, "end": 90, "speaker": "NONE", "text": "" },
+    {
+      "start": 90,
+      "end": 180,
+      "speaker": "CHARACTER_1",
+      "text": "The petals are falling like snow!"
+    },
+    {
+      "start": 180,
+      "end": 270,
+      "speaker": "CHARACTER_2",
+      "text": "Spring is truly magical here."
+    }
+  ],
+  "characters": {
+    "character1": {
+      "name": "Hiro",
+      "gender": "male",
+      "primaryColor": "#4B0082",
+      "secondaryColor": "#191970",
+      "hairColor": "#000000",
+      "skinTone": "#F5DEB3",
+      "audioConfig": {
+        "voice": "echo",
+        "voiceInstructions": "Appreciative and calm, enjoying the beauty of nature.",
+        "speed": 0.95
+      }
+    },
+    "character2": {
+      "name": "Sakura",
+      "gender": "female",
+      "primaryColor": "#FF69B4",
+      "secondaryColor": "#FF1493",
+      "hairColor": "#8B4513",
+      "skinTone": "#FFE4B5",
+      "audioConfig": {
+        "voice": "nova",
+        "voiceInstructions": "Soft and dreamy, enchanted by the cherry blossoms.",
+        "speed": 0.95
+      }
+    }
+  },
+  "audioSettings": {
+    "generateVoiceover": true,
+    "model": "gpt-4o-mini-tts",
+    "globalSpeed": 1.0
+  }
+}

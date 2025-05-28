@@ -1,5 +1,6 @@
 import { Speaker } from '../components/characters/CharacterAnimations';
 import { CharacterAudioConfig } from '../types/audio';
+import { EnvironmentType } from '../components/environment/EnvironmentFactory';
 
 export interface CameraSequenceItem {
   shotName: string;
@@ -28,6 +29,7 @@ export interface CharacterStyle {
 }
 
 export interface SceneConfig {
+  environment?: EnvironmentType; // Environment setting
   cameraSequence: CameraSequenceItem[];
   conversation: ConversationSegment[];
   backgroundAudio?: string;

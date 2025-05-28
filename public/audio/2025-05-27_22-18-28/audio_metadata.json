@@ -1,0 +1,86 @@
+[
+  {
+    "filepath": "/Users/ssuman/Downloads/Projects/figmaFileToLLMContext/walking-characters-remotion/public/audio/2025-05-27_22-18-28/dialogue_2_character1_alex.mp3",
+    "duration": 7.2,
+    "text": "You know, Maya, walking through this ancient forest makes me think about time itself.",
+    "speaker": "Alex",
+    "voice": "onyx"
+  },
+  {
+    "filepath": "/Users/ssuman/Downloads/Projects/figmaFileToLLMContext/walking-characters-remotion/public/audio/2025-05-27_22-18-28/dialogue_3_character2_maya.mp3",
+    "duration": 1.968,
+    "text": "What do you mean, Alex? How so?",
+    "speaker": "Maya",
+    "voice": "nova"
+  },
+  {
+    "filepath": "/Users/ssuman/Downloads/Projects/figmaFileToLLMContext/walking-characters-remotion/public/audio/2025-05-27_22-18-28/dialogue_4_character1_alex.mp3",
+    "duration": 10.008,
+    "text": "These trees have been growing for centuries. They've witnessed countless stories, yet we only see this single moment.",
+    "speaker": "Alex",
+    "voice": "onyx"
+  },
+  {
+    "filepath": "/Users/ssuman/Downloads/Projects/figmaFileToLLMContext/walking-characters-remotion/public/audio/2025-05-27_22-18-28/dialogue_5_character2_maya.mp3",
+    "duration": 5.256,
+    "text": "That's profound. It reminds me of what my grandmother used to say about rivers...",
+    "speaker": "Maya",
+    "voice": "nova"
+  },
+  {
+    "filepath": "/Users/ssuman/Downloads/Projects/figmaFileToLLMContext/walking-characters-remotion/public/audio/2025-05-27_22-18-28/dialogue_6_character1_alex.mp3",
+    "duration": 1.248,
+    "text": "What did she say?",
+    "speaker": "Alex",
+    "voice": "onyx"
+  },
+  {
+    "filepath": "/Users/ssuman/Downloads/Projects/figmaFileToLLMContext/walking-characters-remotion/public/audio/2025-05-27_22-18-28/dialogue_7_character2_maya.mp3",
+    "duration": 8.616,
+    "text": "She said rivers never really change, yet the water is always different. Like our friendship - constant, but always evolving.",
+    "speaker": "Maya",
+    "voice": "nova"
+  },
+  {
+    "filepath": "/Users/ssuman/Downloads/Projects/figmaFileToLLMContext/walking-characters-remotion/public/audio/2025-05-27_22-18-28/dialogue_8_character1_alex.mp3",
+    "duration": 7.752,
+    "text": "I never thought of it that way. We've known each other for years, but every conversation reveals something new.",
+    "speaker": "Alex",
+    "voice": "onyx"
+  },
+  {
+    "filepath": "/Users/ssuman/Downloads/Projects/figmaFileToLLMContext/walking-characters-remotion/public/audio/2025-05-27_22-18-28/dialogue_9_character2_maya.mp3",
+    "duration": 4.32,
+    "text": "Exactly! Sometimes I wonder what we'll discover about ourselves on this journey.",
+    "speaker": "Maya",
+    "voice": "nova"
+  },
+  {
+    "filepath": "/Users/ssuman/Downloads/Projects/figmaFileToLLMContext/walking-characters-remotion/public/audio/2025-05-27_22-18-28/dialogue_10_character1_alex.mp3",
+    "duration": 8.112,
+    "text": "Maybe that's the real adventure - not just exploring the world, but understanding who we are within it.",
+    "speaker": "Alex",
+    "voice": "onyx"
+  },
+  {
+    "filepath": "/Users/ssuman/Downloads/Projects/figmaFileToLLMContext/walking-characters-remotion/public/audio/2025-05-27_22-18-28/dialogue_11_character2_maya.mp3",
+    "duration": 5.76,
+    "text": "And perhaps realizing that we're just as interconnected as this forest ecosystem around us.",
+    "speaker": "Maya",
+    "voice": "nova"
+  },
+  {
+    "filepath": "/Users/ssuman/Downloads/Projects/figmaFileToLLMContext/walking-characters-remotion/public/audio/2025-05-27_22-18-28/dialogue_12_character1_alex.mp3",
+    "duration": 2.76,
+    "text": "The journey continues...",
+    "speaker": "Alex",
+    "voice": "onyx"
+  },
+  {
+    "filepath": "/Users/ssuman/Downloads/Projects/figmaFileToLLMContext/walking-characters-remotion/public/audio/2025-05-27_22-18-28/dialogue_12_character2_maya.mp3",
+    "duration": 3,
+    "text": "The journey continues...",
+    "speaker": "Maya",
+    "voice": "nova"
+  }
+]

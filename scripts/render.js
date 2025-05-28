@@ -59,9 +59,25 @@ async function generateAudioFiles(configPathOrType, timestamp) {
 
 // Parse command line arguments
 const args = process.argv.slice(2);
-const composition = args[0] || 'JungleWalk';
-const configPathOrType = args[1] || 'deep'; // Can be a path to JSON file or a predefined type
-const glFlag = args[2] || '--gl=angle';
+
+// Extract named arguments
+let configFile = null;
+let glFlag = '--gl=angle';
+const namedArgs = [];
+const positionalArgs = [];
+
+args.forEach(arg => {
+  if (arg.startsWith('--configFile=')) {
+    configFile = arg.split('=')[1];
+  } else if (arg.startsWith('--gl=')) {
+    glFlag = arg;
+  } else if (!arg.startsWith('--')) {
+    positionalArgs.push(arg);
+  }
+});
+
+const composition = positionalArgs[0] || 'JungleWalk';
+const configPathOrType = configFile || positionalArgs[1] || 'deep'; // Can be a path to JSON file or a predefined type
 
 // Check if config is a file path or a type
 let configType, configPath, configName;

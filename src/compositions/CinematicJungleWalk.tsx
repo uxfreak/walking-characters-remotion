@@ -87,6 +87,7 @@ export const CinematicJungleWalk: React.FC<JungleWalkProps> = (props) => {
         enableControls={false}
         character1Style={sceneConfig.characters?.character1}
         character2Style={sceneConfig.characters?.character2}
+        environment={sceneConfig.environment || 'jungle'}
       />
       
       {/* Cinematic letterbox */}

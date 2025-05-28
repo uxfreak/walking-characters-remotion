@@ -1,0 +1,79 @@
+{
+  "name": "Cherry Blossom Wisdom",
+  "description": "A master and student discuss life under cherry blossoms",
+  "environment": "cherryBlossom",
+  "cameraSequence": [
+    { "shotName": "environment", "start": 0, "end": 180 },
+    { "shotName": "wide", "start": 180, "end": 360 },
+    { "shotName": "lowAngle", "start": 360, "end": 540 },
+    { "shotName": "character1Focus", "start": 540, "end": 720 },
+    { "shotName": "character2Focus", "start": 720, "end": 900 },
+    { "shotName": "highAngle", "start": 900, "end": 1080 }
+  ],
+  "conversation": [
+    { "start": 0, "end": 180, "speaker": "NONE", "text": "" },
+    {
+      "start": 180,
+      "end": 360,
+      "speaker": "CHARACTER_2",
+      "text": "Master, why do the cherry blossoms bloom for such a short time?"
+    },
+    {
+      "start": 360,
+      "end": 540,
+      "speaker": "CHARACTER_1",
+      "text": "Their brevity teaches us about the preciousness of each moment, young one."
+    },
+    {
+      "start": 540,
+      "end": 720,
+      "speaker": "CHARACTER_1",
+      "text": "Like these petals that fall around us, life is fleeting but beautiful."
+    },
+    {
+      "start": 720,
+      "end": 900,
+      "speaker": "CHARACTER_2",
+      "text": "So we should cherish every step we take on this path?"
+    },
+    {
+      "start": 900,
+      "end": 1080,
+      "speaker": "CHARACTER_1",
+      "text": "Exactly. Each footstep, each breath, each falling petal is a gift."
+    }
+  ],
+  "characters": {
+    "character1": {
+      "name": "Master Takeshi",
+      "gender": "male",
+      "primaryColor": "#4B0082",
+      "secondaryColor": "#191970",
+      "hairColor": "#C0C0C0",
+      "skinTone": "#F5DEB3",
+      "audioConfig": {
+        "voice": "onyx",
+        "voiceInstructions": "Ancient, wise voice. Speak very slowly with deep gravitas and long, meaningful pauses. Each word carefully chosen, as if sharing profound truths.",
+        "speed": 0.85
+      }
+    },
+    "character2": {
+      "name": "Sakura",
+      "gender": "female",
+      "primaryColor": "#FF1493",
+      "secondaryColor": "#C71585",
+      "hairColor": "#000000",
+      "skinTone": "#FFE4B5",
+      "audioConfig": {
+        "voice": "nova",
+        "voiceInstructions": "Young, eager student. Voice filled with curiosity and respect. Speaking with wonder and reverence for the master's wisdom.",
+        "speed": 1.0
+      }
+    }
+  },
+  "audioSettings": {
+    "generateVoiceover": true,
+    "model": "gpt-4o-mini-tts",
+    "globalSpeed": 1.0
+  }
+}

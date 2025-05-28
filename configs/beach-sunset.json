@@ -1,0 +1,79 @@
+{
+  "name": "Beach Sunset Walk",
+  "description": "A romantic conversation during a beach sunset",
+  "environment": "beach",
+  "cameraSequence": [
+    { "shotName": "environment", "start": 0, "end": 150 },
+    { "shotName": "wide", "start": 150, "end": 300 },
+    { "shotName": "sideProfile", "start": 300, "end": 450 },
+    { "shotName": "character1Focus", "start": 450, "end": 600 },
+    { "shotName": "character2Focus", "start": 600, "end": 750 },
+    { "shotName": "closeUp", "start": 750, "end": 900 }
+  ],
+  "conversation": [
+    { "start": 0, "end": 150, "speaker": "NONE", "text": "" },
+    {
+      "start": 150,
+      "end": 300,
+      "speaker": "CHARACTER_1",
+      "text": "The ocean looks so peaceful at sunset, doesn't it?"
+    },
+    {
+      "start": 300,
+      "end": 450,
+      "speaker": "CHARACTER_2",
+      "text": "It's breathtaking. I love how the waves catch the golden light."
+    },
+    {
+      "start": 450,
+      "end": 600,
+      "speaker": "CHARACTER_1",
+      "text": "Walking on the beach with you... this is perfect."
+    },
+    {
+      "start": 600,
+      "end": 750,
+      "speaker": "CHARACTER_2",
+      "text": "Let's come back here every sunset. It can be our special place."
+    },
+    {
+      "start": 750,
+      "end": 900,
+      "speaker": "BOTH",
+      "text": "Forever..."
+    }
+  ],
+  "characters": {
+    "character1": {
+      "name": "James",
+      "gender": "male",
+      "primaryColor": "#87CEEB",
+      "secondaryColor": "#4682B4",
+      "hairColor": "#8B4513",
+      "skinTone": "#F5DEB3",
+      "audioConfig": {
+        "voice": "echo",
+        "voiceInstructions": "Warm, romantic tone. Speaking softly with love and contentment. Gentle pauses between thoughts, as if savoring the moment.",
+        "speed": 0.9
+      }
+    },
+    "character2": {
+      "name": "Emma",
+      "gender": "female",
+      "primaryColor": "#FFB6C1",
+      "secondaryColor": "#FF69B4",
+      "hairColor": "#FFD700",
+      "skinTone": "#FFDAB9",
+      "audioConfig": {
+        "voice": "shimmer",
+        "voiceInstructions": "Soft, dreamy voice filled with happiness. Speaking with gentle emotion and occasional sighs of contentment.",
+        "speed": 0.95
+      }
+    }
+  },
+  "audioSettings": {
+    "generateVoiceover": true,
+    "model": "gpt-4o-mini-tts",
+    "globalSpeed": 1.0
+  }
+}

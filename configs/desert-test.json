@@ -1,0 +1,58 @@
+{
+  "name": "Desert Test",
+  "description": "Quick test of desert environment",
+  "environment": "desert",
+  "cameraSequence": [
+    { "shotName": "environment", "start": 0, "end": 90 },
+    { "shotName": "wide", "start": 90, "end": 180 },
+    { "shotName": "closeUp", "start": 180, "end": 270 }
+  ],
+  "conversation": [
+    { "start": 0, "end": 90, "speaker": "NONE", "text": "" },
+    {
+      "start": 90,
+      "end": 180,
+      "speaker": "CHARACTER_1",
+      "text": "The heat is intense today!"
+    },
+    {
+      "start": 180,
+      "end": 270,
+      "speaker": "CHARACTER_2",
+      "text": "Look at those beautiful cacti."
+    }
+  ],
+  "characters": {
+    "character1": {
+      "name": "Jake",
+      "gender": "male",
+      "primaryColor": "#D2691E",
+      "secondaryColor": "#8B4513",
+      "hairColor": "#000000",
+      "skinTone": "#D2B48C",
+      "audioConfig": {
+        "voice": "echo",
+        "voiceInstructions": "Tired from the desert heat, speaking slowly.",
+        "speed": 0.9
+      }
+    },
+    "character2": {
+      "name": "Rosa",
+      "gender": "female",
+      "primaryColor": "#FF6347",
+      "secondaryColor": "#CD5C5C",
+      "hairColor": "#8B4513",
+      "skinTone": "#F5DEB3",
+      "audioConfig": {
+        "voice": "nova",
+        "voiceInstructions": "Admiring the desert landscape with wonder.",
+        "speed": 1.0
+      }
+    }
+  },
+  "audioSettings": {
+    "generateVoiceover": true,
+    "model": "gpt-4o-mini-tts",
+    "globalSpeed": 1.0
+  }
+}

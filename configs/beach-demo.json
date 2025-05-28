@@ -1,0 +1,58 @@
+{
+  "name": "Beach Environment Demo",
+  "description": "A quick demo of the enhanced beach sunset environment",
+  "environment": "beach",
+  "cameraSequence": [
+    { "shotName": "environment", "start": 0, "end": 100 },
+    { "shotName": "wide", "start": 100, "end": 200 },
+    { "shotName": "sideProfile", "start": 200, "end": 300 }
+  ],
+  "conversation": [
+    { "start": 0, "end": 100, "speaker": "NONE", "text": "" },
+    {
+      "start": 100,
+      "end": 200,
+      "speaker": "CHARACTER_1",
+      "text": "Look at this beautiful sunset!"
+    },
+    {
+      "start": 200,
+      "end": 300,
+      "speaker": "CHARACTER_2",
+      "text": "The beach looks amazing!"
+    }
+  ],
+  "characters": {
+    "character1": {
+      "name": "Alex",
+      "gender": "male",
+      "primaryColor": "#87CEEB",
+      "secondaryColor": "#4682B4",
+      "hairColor": "#8B4513",
+      "skinTone": "#F5DEB3",
+      "audioConfig": {
+        "voice": "echo",
+        "voiceInstructions": "Excited and happy tone",
+        "speed": 1.0
+      }
+    },
+    "character2": {
+      "name": "Maya",
+      "gender": "female",
+      "primaryColor": "#FFB6C1",
+      "secondaryColor": "#FF69B4",
+      "hairColor": "#FFD700",
+      "skinTone": "#FFDAB9",
+      "audioConfig": {
+        "voice": "shimmer",
+        "voiceInstructions": "Joyful and amazed",
+        "speed": 1.0
+      }
+    }
+  },
+  "audioSettings": {
+    "generateVoiceover": true,
+    "model": "gpt-4o-mini-tts",
+    "globalSpeed": 1.0
+  }
+}

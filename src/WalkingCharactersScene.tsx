@@ -7,6 +7,7 @@ import { CharacterAnimations, Speaker } from './components/characters/CharacterA
 import { JungleEnvironment } from './components/environment/Jungle';
 import { CameraShot } from './constants/cameraShots';
 import { CharacterStyle } from './data/sceneConfig';
+import { EnvironmentFactory, EnvironmentType, IEnvironment } from './components/environment/EnvironmentFactory';
 
 export interface WalkingCharactersSceneProps {
   frame?: number;
@@ -16,6 +17,7 @@ export interface WalkingCharactersSceneProps {
   enableControls?: boolean; // For development/preview
   character1Style?: CharacterStyle;
   character2Style?: CharacterStyle;
+  environment?: EnvironmentType;
 }
 
 export default function WalkingCharactersScene({ 
@@ -25,14 +27,15 @@ export default function WalkingCharactersScene({
   cameraShot,
   enableControls = false,
   character1Style,
-  character2Style
+  character2Style,
+  environment = 'jungle'
 }: WalkingCharactersSceneProps) {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const sceneSetupRef = useRef<SceneSetup | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
   const character1Ref = useRef<{ character: Character; animations: CharacterAnimations } | null>(null);
   const character2Ref = useRef<{ character: Character; animations: CharacterAnimations } | null>(null);
-  const jungleRef = useRef<JungleEnvironment | null>(null);
+  const environmentRef = useRef<IEnvironment | null>(null);
   
   const walkSpeed = 0.7;
   
@@ -81,10 +84,10 @@ export default function WalkingCharactersScene({
       controlsRef.current.setTarget(currentTarget);
     }
     
-    // Update jungle environment based on frame distance
-    if (jungleRef.current) {
+    // Update environment based on frame distance
+    if (environmentRef.current) {
       const frameDistance = frameNumber * walkSpeed / fps;
-      jungleRef.current.updateByFrame(frameDistance);
+      environmentRef.current.updateByFrame(frameDistance);
     }
     
     // Update controls if enabled and render
@@ -113,12 +116,15 @@ export default function WalkingCharactersScene({
     
     let sceneSetup;
     try {
+      // Get environment config
+      const envConfig = EnvironmentFactory.getEnvironmentConfig(environment);
+      
       // Create scene setup
       sceneSetup = new SceneSetup({
-        backgroundColor: 0x8FBC8F,
-        fogColor: 0x7A9B7A,
-        fogNear: 25,
-        fogFar: 80,
+        backgroundColor: envConfig.backgroundColor,
+        fogColor: envConfig.fogColor,
+        fogNear: envConfig.fogNear,
+        fogFar: envConfig.fogFar,
         enableShadows: true
       });
       sceneSetupRef.current = sceneSetup;
@@ -146,9 +152,9 @@ export default function WalkingCharactersScene({
       controlsRef.current = controls;
     }
     
-    // Create jungle environment with deterministic seed
-    const jungle = new JungleEnvironment(sceneSetup.scene, 12345);
-    jungleRef.current = jungle;
+    // Create environment with deterministic seed
+    const env = EnvironmentFactory.create(environment, sceneSetup.scene, 12345);
+    environmentRef.current = env;
     
     // Create characters with styles
     const character1 = new Character(character1Style);
@@ -178,7 +184,7 @@ export default function WalkingCharactersScene({
         controlsRef.current.dispose();
       }
     };
-  }, [character1Style, character2Style]);
+  }, [character1Style, character2Style, environment]);
   
   // Update animation when frame or speaker changes
   useEffect(() => {

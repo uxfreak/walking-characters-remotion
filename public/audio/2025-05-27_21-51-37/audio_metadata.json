@@ -1,0 +1,23 @@
+[
+  {
+    "filepath": "/Users/ssuman/Downloads/Projects/figmaFileToLLMContext/walking-characters-remotion/public/audio/2025-05-27_21-51-37/dialogue_1_character1_nick.mp3",
+    "duration": 3.168,
+    "text": "It's so peaceful when snow falls.",
+    "speaker": "Nick",
+    "voice": "onyx"
+  },
+  {
+    "filepath": "/Users/ssuman/Downloads/Projects/figmaFileToLLMContext/walking-characters-remotion/public/audio/2025-05-27_21-51-37/dialogue_2_character2_winter.mp3",
+    "duration": 3.912,
+    "text": "Like the whole world is wrapped in a blanket.",
+    "speaker": "Winter",
+    "voice": "shimmer"
+  },
+  {
+    "filepath": "/Users/ssuman/Downloads/Projects/figmaFileToLLMContext/walking-characters-remotion/public/audio/2025-05-27_21-51-37/dialogue_3_character1_nick.mp3",
+    "duration": 3.864,
+    "text": "Our footprints are the only sound.",
+    "speaker": "Nick",
+    "voice": "onyx"
+  }
+]
