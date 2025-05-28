@@ -48,22 +48,33 @@ export const BeachMaterials = {
 class DetailedPalmTree {
   private mesh: THREE.Group;
 
-  constructor(x: number, z: number, seed: number = 0) {
+  constructor(x: number, z: number, seed: number = 0, size: 'small' | 'medium' | 'large' = 'medium') {
     this.mesh = new THREE.Group();
     
     // Use seeded random for consistent tree generation
     const random = this.createSeededRandom(seed);
     
-    // Trunk with segments and slight curve
+    // Size variations
+    const sizeMultipliers = {
+      small: { height: 0.6, width: 0.7, fronds: 6 },
+      medium: { height: 1.0, width: 1.0, fronds: 8 },
+      large: { height: 1.4, width: 1.2, fronds: 10 }
+    };
+    const sizeConfig = sizeMultipliers[size];
+    
+    // Trunk with segments and slight curve - reduced radius
+    const trunkHeight = 8 * sizeConfig.height;
+    const trunkRadius = 0.25 * sizeConfig.width; // Reduced from 0.5 to 0.25
+    
     const trunkCurve = new THREE.CatmullRomCurve3([
       new THREE.Vector3(0, 0, 0),
-      new THREE.Vector3(0.2 + random() * 0.2, 2, 0),
-      new THREE.Vector3(0.1 + random() * 0.2, 4, 0.1 + random() * 0.1),
-      new THREE.Vector3(0, 6, 0),
-      new THREE.Vector3(-0.1 + random() * 0.2, 8, 0)
+      new THREE.Vector3((0.2 + random() * 0.2) * sizeConfig.width, trunkHeight * 0.25, 0),
+      new THREE.Vector3((0.1 + random() * 0.2) * sizeConfig.width, trunkHeight * 0.5, (0.1 + random() * 0.1) * sizeConfig.width),
+      new THREE.Vector3(0, trunkHeight * 0.75, 0),
+      new THREE.Vector3((-0.1 + random() * 0.2) * sizeConfig.width, trunkHeight, 0)
     ]);
     
-    const trunkGeometry = new THREE.TubeGeometry(trunkCurve, 20, 0.5, 8, false);
+    const trunkGeometry = new THREE.TubeGeometry(trunkCurve, 20, trunkRadius, 8, false);
     const trunkMaterial = new THREE.MeshStandardMaterial({ 
       color: 0x8B4513,
       roughness: 0.8,
@@ -81,19 +92,19 @@ class DetailedPalmTree {
       metalness: 0
     });
     
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < sizeConfig.fronds; i++) {
       const frond = new THREE.Group();
       
-      // Create curved frond spine with some variation
-      const curve1 = 2 + random() * 1;
-      const curve2 = 4 + random() * 1;
-      const curve3 = 5.5 + random() * 0.5;
+      // Create curved frond spine with some variation - scaled by size
+      const curve1 = (2 + random() * 1) * sizeConfig.width;
+      const curve2 = (4 + random() * 1) * sizeConfig.width;
+      const curve3 = (5.5 + random() * 0.5) * sizeConfig.width;
       
       const frondCurve = new THREE.CatmullRomCurve3([
         new THREE.Vector3(0, 0, 0),
-        new THREE.Vector3(curve1, -0.5, 0),
-        new THREE.Vector3(curve2, -1.5, 0),
-        new THREE.Vector3(curve3, -2.5, 0)
+        new THREE.Vector3(curve1, -0.5 * sizeConfig.height, 0),
+        new THREE.Vector3(curve2, -1.5 * sizeConfig.height, 0),
+        new THREE.Vector3(curve3, -2.5 * sizeConfig.height, 0)
       ]);
       
       // Create frond geometry with leaflets
@@ -118,28 +129,31 @@ class DetailedPalmTree {
       frondMesh.castShadow = true;
       
       frond.add(frondMesh);
-      frond.position.y = 8;
-      frond.rotation.y = (Math.PI * 2 / 8) * i + random() * 0.2;
+      frond.position.y = trunkHeight;
+      frond.rotation.y = (Math.PI * 2 / sizeConfig.fronds) * i + random() * 0.2;
       frond.rotation.z = Math.PI / 8 + random() * 0.2;
       
       this.mesh.add(frond);
     }
     
-    // Add coconuts
+    // Add coconuts - scaled by size
     const coconutMaterial = new THREE.MeshStandardMaterial({ 
       color: 0x8B4513,
       roughness: 0.9,
       metalness: 0
     });
-    for (let i = 0; i < 4; i++) {
+    const coconutCount = size === 'small' ? 2 : size === 'large' ? 6 : 4;
+    const coconutSize = 0.2 * sizeConfig.width;
+    
+    for (let i = 0; i < coconutCount; i++) {
       const coconut = new THREE.Mesh(
-        new THREE.SphereGeometry(0.3, 8, 6),
+        new THREE.SphereGeometry(coconutSize, 8, 6),
         coconutMaterial
       );
       coconut.position.set(
-        random() * 1 - 0.5,
-        7.5 + random() * 0.5,
-        random() * 1 - 0.5
+        (random() * 1 - 0.5) * sizeConfig.width,
+        trunkHeight * 0.9 + random() * 0.5,
+        (random() * 1 - 0.5) * sizeConfig.width
       );
       coconut.castShadow = true;
       this.mesh.add(coconut);
@@ -425,22 +439,69 @@ export class BeachEnvironment extends BaseEnvironment {
   private createPalmTrees(): void {
     const random = this.createSeededRandom(this.seed + 300);
     
-    // Create palm trees along both sides of the beach
+    // Helper function to get random size based on weighted distribution
+    const getRandomSize = (): 'small' | 'medium' | 'large' => {
+      const rand = random();
+      if (rand < 0.3) return 'small';
+      if (rand < 0.7) return 'medium';
+      return 'large';
+    };
+    
+    // Create palm trees along both sides of the beach with size variation
     for (let section = -1; section <= 1; section++) {
-      // Trees on the left side (character side)
-      for (let i = 0; i < 3; i++) {
+      // Trees on the left side (character side) - more sparse
+      for (let i = 0; i < 4; i++) {
         const x = -15 + random() * 10; // Left side of characters
-        const z = section * 200 + i * 60 + random() * 40;
-        const tree = new DetailedPalmTree(x, z, this.seed + section * 100 + i);
+        const z = section * 200 + i * 50 + random() * 30;
+        const size = getRandomSize();
+        const tree = new DetailedPalmTree(x, z, this.seed + section * 100 + i, size);
         this.palmTrees.push(tree);
         this.scene.add(tree.getMesh());
       }
       
       // Trees on the right side (near water but not blocking view)
-      for (let i = 0; i < 2; i++) {
+      for (let i = 0; i < 3; i++) {
         const x = 8 + random() * 5; // Right side near water
-        const z = section * 200 + i * 80 + random() * 30;
-        const tree = new DetailedPalmTree(x, z, this.seed + section * 100 + i + 50);
+        const z = section * 200 + i * 60 + random() * 20;
+        const size = getRandomSize();
+        const tree = new DetailedPalmTree(x, z, this.seed + section * 100 + i + 50, size);
+        this.palmTrees.push(tree);
+        this.scene.add(tree.getMesh());
+      }
+      
+      // Dense forest near mountains (far left side)
+      for (let i = 0; i < 12; i++) {
+        const x = -40 + random() * 25; // Deep into the mountain area
+        const z = section * 200 + i * 25 + random() * 20;
+        
+        // Forest trees tend to be taller but more varied
+        const forestRand = random();
+        const size = forestRand < 0.2 ? 'small' : forestRand < 0.5 ? 'medium' : 'large';
+        
+        const tree = new DetailedPalmTree(x, z, this.seed + section * 100 + i + 100, size);
+        this.palmTrees.push(tree);
+        this.scene.add(tree.getMesh());
+      }
+      
+      // Additional scattered trees for depth
+      for (let i = 0; i < 8; i++) {
+        const x = -25 + random() * 15; // Mid-distance trees
+        const z = section * 200 + i * 35 + random() * 25;
+        const size = getRandomSize();
+        const tree = new DetailedPalmTree(x, z, this.seed + section * 100 + i + 200, size);
+        this.palmTrees.push(tree);
+        this.scene.add(tree.getMesh());
+      }
+      
+      // Some background trees for atmosphere
+      for (let i = 0; i < 6; i++) {
+        const x = -65 + random() * 20; // Very far back near mountains
+        const z = section * 200 + i * 40 + random() * 30;
+        
+        // Background trees are mostly large for visibility
+        const size = random() < 0.7 ? 'large' : 'medium';
+        
+        const tree = new DetailedPalmTree(x, z, this.seed + section * 100 + i + 300, size);
         this.palmTrees.push(tree);
         this.scene.add(tree.getMesh());
       }
@@ -502,31 +563,6 @@ export class BeachEnvironment extends BaseEnvironment {
     return seagull;
   }
 
-  private createPalmTrees(): void {
-    // Use deterministic random for tree placement
-    const random = this.createSeededRandom(this.seed);
-
-    // Place palm trees in multiple sections for infinite scrolling
-    for (let section = -1; section <= 1; section++) {
-      // Trees near the walking path (left side)
-      for (let i = 0; i < 4; i++) {
-        const x = -30 + random() * 20;
-        const z = section * 200 + i * 40 + random() * 20;
-        const palmTree = new DetailedPalmTree(x, z, this.seed + section * 100 + i);
-        this.palmTrees.push(palmTree);
-        this.scene.add(palmTree.getMesh());
-      }
-
-      // Some trees on the right (beach side)
-      for (let i = 0; i < 2; i++) {
-        const x = 5 + random() * 10;
-        const z = section * 200 + i * 60 + random() * 30;
-        const palmTree = new DetailedPalmTree(x, z, this.seed + section * 100 + i + 50);
-        this.palmTrees.push(palmTree);
-        this.scene.add(palmTree.getMesh());
-      }
-    }
-  }
 
   private createMountains(): void {
     const random = this.createSeededRandom(this.seed + 200);
